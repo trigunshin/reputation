@@ -17,9 +17,10 @@ function setStdlib(aStdlib) {
 function setRedisClient(aRedisClient) {
     redisClient = aRedisClient;
     dbmux.setRedisClient(aRedisClient);
-    fundController.setRedisClient(redisClient);
 };
 
+var userController = require("./controllers/users");
+userController.setDBMux(dbmux);
 
 var index = function(request, response) {
     response.render(__dirname+"/views/index", {
