@@ -1,0 +1,19 @@
+br
+form(method="post")
+  fieldset
+    legend General
+    p
+      label(for="user[email]") Email:
+        input(type="text", name="user[email]", value='')
+    p
+      label(for="user[pass]") Password:
+        input(type="password", name="user[pass]", value='')
+    p
+      label(for="user[pass1]") Password Repeat:
+        input(type="password", name="user[pass1]", value='')
+        .tip
+          | Enter a valid 
+          | email address 
+          | such as <em>tj@vision-media.ca</em>.
+  p.buttons
+    input(type="submit", value="Save")
