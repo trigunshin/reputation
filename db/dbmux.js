@@ -47,7 +47,7 @@ if(mongoLabURI) {
 	getConnection = getDedicatedConnection;
 }
 
-var files = ["users", "comment"];
+var files = ["users", "comments"];
 var perDBFile = function(applyToSubclass) {
     for(var i=0,iLen=files.length;i<iLen;i++) {
         var curName = files[i];
