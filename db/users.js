@@ -1,4 +1,4 @@
-var COLL = "users", DB="vortex";
+var COLL = "users", DB="reputation";
 var getCollection = null;
 var stdlib;
 var redisClient;

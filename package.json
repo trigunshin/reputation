@@ -1,5 +1,5 @@
 {
-    "name": "vortex-trading"
+    "name": "reputation"
   , "version": "0.0.1"
   , "private": true
   , "engines": {
@@ -16,7 +16,6 @@
     , "mongodb":"*"
     , "redis":"*"
     , "connect-redis":"*"
-    , "stripe":"*"
     , "bcrypt":"*"
     , "underscore":">= 1.4.2"
   }

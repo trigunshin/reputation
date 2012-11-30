@@ -1,7 +1,7 @@
 var fs = require('fs');
 var express = require('express'),
-RedisStore = require('connect-redis')(express),
-app = module.exports = express.createServer();
+    RedisStore = require('connect-redis')(express),
+    app = module.exports = express.createServer();
 
 /*Set up injections to routes module.*/
 var stdlib = require("./stdlib").stdlib,
@@ -59,32 +59,13 @@ app.configure('production', function(){
 });
 
 // Routes
-
-app.get('/cheap', routes.cheap);
-app.get('/results', routes.results);
-
 app.get('/logout', routes.logoutGet);
 app.get('/signup', routes.signupGet);
 app.post('/login', routes.loginPost);
 app.post('/signup', routes.signupPost);
 
-app.get('/payform', routes.payformGet);
-app.post('/payform', routes.payformPost);
-app.get('/cancelSubscription', routes.cancelSubscription);
-app.post('/stripe_webhook', routes.stripeWehbookPost);
+app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.submit);
 
-app.post('/favorites/add', routes.addFavoriteTicker);
-app.post('/favorites/remove', routes.removeFavoriteTicker);
-
-app.get('/overview/:ticker', routes.overview);
-app.get('/fund/:ticker', routes.fundListing);
-app.get('/fundYearly/:ticker', routes.fundYearly);
-app.post('/fundYearly/:ticker', routes.fundYearlyPost);
-app.get('/fundGraphs/:ticker', routes.fundGraph);
-app.get('/candle/:ticker', routes.candle);
-app.get('/transactions/:transId', routes.transactions);
-//app.get('/:ticker', routes.graph);//TODO fixme maybe
-app.post('/tickersearch', routes.tickersearch);
 app.get('/', routes.index);
 
 var APP_PORT = process.env.PORT || 3000;
