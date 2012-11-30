@@ -1,13 +1,29 @@
-var Db = require('mongodb').Db,
-    Server = require('mongodb').Server;
+var mongoDB = require('mongodb'),
+    Db = mongoDB.Db,
+    Server = mongoDB.Server;
 var stdlib = require("../node_libs/conf/stdlib").stdlib;
+
+var mongoLabURI = process.env.MONGOLAB_URI;
 var SERVER = process.env.MONGO_HOST || "localhost",
     PORT = process.env.MONGO_PORT || 27017;
-console.log("DBMux connecting to mongo @ host&port:"+SERVER+":"+PORT);
+
 var stdlib = require("../stdlib").stdlib;
 var redisClient;
 
-var getConnection = function (collectionName, databaseName) {
+var getMongoLabConnection = function(collectionName) {
+	var cache = {};
+	var key = collectionName;
+	return function(cb) {
+		if(cache[key]) return cb(null, cache[key]);
+		
+		mongoDB.connect(mongoLabURI, stdlib.errorClosure(cb, function(err, openedDB) {
+			openedDB.collection(collectionName, stdlib.errorClosure(cb, function(opened) {
+				cb(null, cache[key] = opened);
+			}));
+		}));
+	};
+};
+var getDedicatedConnection = function (collectionName, databaseName) {
 	var cache = {};
 	var key = collectionName+"___"+databaseName;
 	return function(cb) {
@@ -22,7 +38,16 @@ var getConnection = function (collectionName, databaseName) {
 	};
 };
 
-var files = ["users"];
+var getConnection;
+if(mongoLabURI) {
+	console.log("DBMux connecting to mongo @ " + mongoLabURI);
+	getConnection = getMongoLabConnection;
+} else {
+	console.log("DBMux connecting to mongo @ host&port:"+SERVER+":"+PORT);
+	getConnection = getDedicatedConnection;
+}
+
+var files = ["users", "comment"];
 var perDBFile = function(applyToSubclass) {
     for(var i=0,iLen=files.length;i<iLen;i++) {
         var curName = files[i];
