@@ -34,22 +34,22 @@ var addComment = function(request, response) {
 	//app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
 	console.log("processing params:"+JSON.stringify(request.params));
 	console.log("processing query:"+JSON.stringify(request.query));
-	var site = request.params.website;
-	var articleId = request.params.articleId;
-	var siteUserId = request.params.userId;
-	var siteUsername = request.params.username;
-	var commentId = request.params.commentId;
+	var site = request.param('website');
+	var articleId = request.param('articleId');
+	var siteUserId = request.param('userId');
+	var siteUsername = request.param('username');
+	var commentId = request.param('commentId');
 	var commentText = request.query.comment || "none";
 	var theComment = {
-			site : request.params.website,
-			articleId : request.params.articleId,
-			siteUserId : request.params.userId,
-			siteUsername : request.params.username,
-			commentId : request.params.commentId,
+			site : request.param('website'),
+			articleId : request.param('articleId'),
+			siteUserId : request.param('userId'),
+			siteUsername : request.param('username'),
+			commentId : request.param('commentId'),
 			commentText : request.query.comment || "none",
 			email : "test@test.com"
 	};
-	console.log("Saving comment:" + theComment);
+	console.log("Saving comment:" + JSON.stringify(theComment));
 	commentController.save(theComment, function(err, result) {
 		if(err) return renderError(err, response);
 		res.writeHead(200, {'Content-Type': 'text/plain'});

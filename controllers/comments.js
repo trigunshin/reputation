@@ -14,6 +14,7 @@ var get = function(email, callback) {
 };
 
 var save = function(commentData, callback) {
+	console.log("commentController.save(commentData:" + JSON.stringify(commentData));
     commentDB.save(commentData, stdlib.errorClosure(callback, function(commentResult) {
         return callback(null, commentData);
     }));
