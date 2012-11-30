@@ -70,4 +70,4 @@ app.get('/', routes.index);
 
 var APP_PORT = process.env.PORT || 3000;
 app.listen(APP_PORT);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+console.log("Express server listening on port %d in %s mode", APP_PORT, app.settings.env);
