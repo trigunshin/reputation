@@ -21,12 +21,35 @@ function setRedisClient(aRedisClient) {
 
 var userController = require("./controllers/users");
 userController.setDBMux(dbmux);
+var commentController = require("./controllers/comments");
+commentController.setDBMux(dbmux);
 
 var index = function(request, response) {
     response.render(__dirname+"/views/index", {
         title:"So it begins."
     });
 };
+
+var addComment = function(request, response) {
+	//app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+	var site = request.params.website;
+	var articleId = request.params.articleId;
+	var siteUserId = request.params.userId;
+	var siteUsername = request.params.username;
+	var commentId = request.params.commentId;
+	var commentText = request.query.comment || "none";
+	var theComment = {
+			site : request.params.website,
+			articleId : request.params.articleId,
+			siteUserId : request.params.userId,
+			siteUsername : request.params.username,
+			commentId : request.params.commentId,
+			commentText : request.query.comment || "none",
+			emails : "test@test.com"
+	};
+	commentController.save(theComment);
+};
+
 /*Misc*/
 var redirect = function(response, aMessage, toPage) {
     response.render(__dirname+'/views/redirect', {
@@ -157,6 +180,7 @@ exports.signupGet = signupGet;
 exports.signupPost = signupPost;
 exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
+exports.addComment = addComment;
 
 exports.setRedisClient = setRedisClient;
 exports.setStdlib = setStdlib;
