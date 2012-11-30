@@ -1,7 +1,7 @@
 var mongoDB = require('mongodb'),
     Db = mongoDB.Db,
     Server = mongoDB.Server;
-var stdlib = require("../node_libs/conf/stdlib").stdlib;
+var stdlib = require("../stdlib").stdlib;
 
 var mongoLabURI = process.env.MONGOLAB_URI;
 var SERVER = process.env.MONGO_HOST || "localhost",
@@ -17,6 +17,9 @@ var getMongoLabConnection = function(collectionName) {
 		if(cache[key]) return cb(null, cache[key]);
 		
 		mongoDB.connect(mongoLabURI, stdlib.errorClosure(cb, function(err, openedDB) {
+			openedDB.addListener("error", function(error){
+			    console.log("Error connecting to MongoLab");
+			  });
 			openedDB.collection(collectionName, stdlib.errorClosure(cb, function(opened) {
 				cb(null, cache[key] = opened);
 			}));
