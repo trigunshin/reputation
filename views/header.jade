@@ -1,0 +1,40 @@
+-var randSymb = randomTicker;
+ul#nav
+    li
+        a(href="/", title="Home") Home
+    if(randSymb)
+      li
+          a(href="/overview/#{randSymb}") Random Ticker
+    if(!session.auth)
+        li
+            a(href="/signup") Register
+    else if session.user
+        if session.user.favorites
+            if locals.curTicker
+                if session.user.favorites[curTicker]
+                    li
+                        a(href="javascript:;",class="fav_link starred",id="#{curTicker}")
+                            img(src="/imgs/bright_star.png",id="favImg")
+                else
+                    li
+                        a(href="javascript:;",class="fav_link",id="#{curTicker}")
+                            img(src="/imgs/dark_star.png",id="favImg")
+            li
+                a(href="/favorites",title="Favorites") Favorites
+                ul(id="fav_ul")
+                    - for (var key in session.user.favorites)
+                        li(id="fav_li_#{key}")
+                            a(href="/overview/#{key}") #{key}
+    if locals.curTicker
+        li
+            a(href="/overview/#{curTicker}") Overview:#{curTicker}
+        li
+            a(href="/fundYearly/#{curTicker}") Yearly Comparison:#{curTicker}
+        li
+            a(href="http://www.sec.gov/cgi-bin/browse-edgar?company=&match=&CIK=#{curTicker}&filenum=&State=&Country=&SIC=&owner=exclude&Find=Find+Companies&action=getcompany") SEC:#{curTicker}
+if(!randSymb)
+  h1
+    b
+      .warn Server is having issues, site may not work.
+#userbox
+    include login

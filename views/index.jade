@@ -1,0 +1,11 @@
+center
+    h1= title
+    //-p Welcome to #{title}
+    img(src="/imgs/snowball.gif")
+    br
+    br
+    a(href="/cheap") Cheap Stocks
+    form(name="tickerSearchForm",method="post", action="/tickersearch")
+        label Ticker:
+            input(name='ticker', type='text')
+        input(type="submit", value="Search!")

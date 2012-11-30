@@ -1,0 +1,23 @@
+{
+    "name": "vortex-trading"
+  , "version": "0.0.1"
+  , "private": true
+  , "engines": {
+    "node": "0.8.x",
+    "npm":  "1.1.x"
+  }
+  , "dependencies": {
+      "express": "< 2.9.9"
+    , "stylus": ">= 0.0.1"
+    , "jade": ">= 0.0.1"
+    , "zlib":"*"
+    , "validator": "*"
+    , "request":"*"
+    , "mongodb":"*"
+    , "redis":"*"
+    , "connect-redis":"*"
+    , "stripe":"*"
+    , "bcrypt":"*"
+    , "underscore":">= 1.4.2"
+  }
+}
