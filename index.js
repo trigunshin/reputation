@@ -32,6 +32,8 @@ var index = function(request, response) {
 
 var addComment = function(request, response) {
 	//app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+	console.log("processing params:"+JSON.stringify(request.params));
+	console.log("processing query:"+JSON.stringify(request.query));
 	var site = request.params.website;
 	var articleId = request.params.articleId;
 	var siteUserId = request.params.userId;
@@ -45,7 +47,7 @@ var addComment = function(request, response) {
 			siteUsername : request.params.username,
 			commentId : request.params.commentId,
 			commentText : request.query.comment || "none",
-			emails : "test@test.com"
+			email : "test@test.com"
 	};
 	console.log("Saving comment:" + theComment);
 	commentController.save(theComment, function(err, result) {
