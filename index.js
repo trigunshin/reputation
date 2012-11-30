@@ -52,10 +52,10 @@ var addComment = function(request, response) {
 	console.log("Saving comment:" + JSON.stringify(theComment));
 	commentController.save(theComment, function(err, result) {
 		if(err) return renderError(err, response);
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-	    console.log("Saved comment: " + JSON.stringify(result));
-	    res.write("Comment saved.");
-	    res.end();
+		console.log("Saved comment: " + JSON.stringify(result));
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+	    response.write("Comment saved.");
+	    response.end();
 	});
 };
 
