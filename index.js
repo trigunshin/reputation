@@ -49,10 +49,8 @@ var addComment = function(request, response) {
 			commentText : request.query.comment || "none",
 			email : "test@test.com"
 	};
-	console.log("Saving comment:" + JSON.stringify(theComment));
 	commentController.save(theComment, function(err, result) {
 		if(err) return renderError(err, response);
-		console.log("Saved comment: " + JSON.stringify(result));
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 	    response.write("Comment saved.");
 	    response.end();

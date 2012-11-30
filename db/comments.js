@@ -16,11 +16,8 @@ function setCollectionAccessor(getColl) {
 };
 
 var save = function(comment, callback) {
-	console.log("commentDB.save(commentData:" + JSON.stringify(comment));
     getCollection(stdlib.errorClosure(callback, function(collection) {
-    	console.log("commentDB.gotCollection");
         collection.insert(comment, stdlib.errorClosure(callback, function(result) {
-        	console.log("commentDB.inserted comment");
             callback(null, result);
         }));
     }));
