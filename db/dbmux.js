@@ -16,7 +16,7 @@ var getMongoLabConnection = function(collectionName) {
 	return function(cb) {
 		if(cache[key]) return cb(null, cache[key]);
 		
-		mongoDB.connect(mongoLabURI, stdlib.errorClosure(cb, function(err, openedDB) {
+		mongoDB.connect(mongoLabURI, stdlib.errorClosure(cb, function(openedDB) {
 			openedDB.collection(collectionName, stdlib.errorClosure(cb, function(opened) {
 				cb(null, cache[key] = opened);
 			}));
