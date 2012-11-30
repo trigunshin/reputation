@@ -47,7 +47,13 @@ var addComment = function(request, response) {
 			commentText : request.query.comment || "none",
 			emails : "test@test.com"
 	};
-	commentController.save(theComment);
+	commentController.save(theComment, function(err, result) {
+		if(err) return renderError(err, response);
+		res.writeHead(200, {'Content-Type': 'text/plain'});
+	    console.log("Saved comment: " + JSON.stringify(result));
+	    res.write("Comment saved.");
+	    res.end();
+	});
 };
 
 /*Misc*/
