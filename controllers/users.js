@@ -37,25 +37,9 @@ var getPassHash = function(pass, callback) {
     }));
 };
 
-var pushFavoriteTicker = function(email, ticker, callback) {
-    userDB.pushFavoriteTicker(email, ticker, stdlib.errorClosure(callback, function(updatedUser) {
-        return callback(null, updatedUser);
-    }));
-};
-
-var pullFavoriteTicker = function(email, ticker, callback) {
-    userDB.pullFavoriteTicker(email, ticker, stdlib.errorClosure(callback, function(updatedUser) {
-        return callback(null, updatedUser);
-    }));
-};
-
 exports.getPassHash = getPassHash;
 exports.verifyPass = verifyPass;
 exports.setDBMux = setDBMux;
 exports.get = get;
 exports.save = save;
 exports.findAndUpdate = findAndUpdate;
-exports.pullFavoriteTicker = pullFavoriteTicker;
-exports.pushFavoriteTicker = pushFavoriteTicker;
-exports.addSubscription = addSubscription;
-exports.cancelSubscription = cancelSubscription;
