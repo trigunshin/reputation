@@ -64,7 +64,7 @@ app.get('/signup', routes.signupGet);
 app.post('/login', routes.loginPost);
 app.post('/signup', routes.signupPost);
 
-app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+app.get('/userData/:website/:articleId/:username/:userId/:commentId/add', routes.addComment);
 
 app.get('/', routes.index);
 
