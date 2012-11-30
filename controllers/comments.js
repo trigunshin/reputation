@@ -4,7 +4,7 @@ var stdlib = require("../stdlib").stdlib,
     commentDB = null,
     setDBMux = function(aDBMux) {
         dbmux = aDBMux;
-        commentDB = dbmux.comment;
+        commentDB = dbmux.comments;
     };
 
 var get = function(email, callback) {
