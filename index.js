@@ -62,7 +62,7 @@ var userCommentGet = function(request, response) {
 		if(err) return renderError(err, response);
 		response.writeHead(200, {'Content-Type': 'application/javasript'});
 	    //response.write("Comment gotten.\n");
-	    response.write("userReputationDataCallback(\""+JSON.stringify(commentList)+"\");");
+	    response.write("userReputationDataCallback("+JSON.stringify(commentList)+");");
 	    response.end();
 	});
 };
