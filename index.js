@@ -41,7 +41,7 @@ var index = function(request, response) {
     });
 };
 
-var index = function(request, response) {
+var profileGet = function(request, response) {
     response.render(__dirname+"/views/profile", {
         title:"So it begins."
     });
@@ -220,6 +220,7 @@ exports.signupPost = signupPost;
 exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
 exports.addComment = addComment;
+exports.profileGet = profileGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
 
 exports.setRedisClient = setRedisClient;
