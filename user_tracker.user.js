@@ -72,6 +72,7 @@ var formHTML_2 = " \
 ";
 function getFormHTML(commentProperties) {
   var dataURL = "http://reputation.herokuapp.com/userData/".concat(
+	userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
     commentProperties.userName,"/",
