@@ -4,7 +4,8 @@ var requestLib = require("request");
 var querystring = require("querystring");
 var content = require("./content")['ext'];
 var url = require("url");
-var fs = require("fs");
+var fs = require("fs"),
+    crypto = require("crypto");
 
 /*handle injections*/
 var dbmux = require("./db/dbmux");
@@ -87,17 +88,22 @@ var signupPost = function(request, response) {
                     else if(userResult)
                         return renderError({'message':"Email already exists. Please try another one or login."}, response);
                     else {
-
-                        var userToSave = {'email':email, 'password':hash, 'createdOn':new Date()};
-                        userController.save(userToSave, function(err) {
-                            if(err) return renderError(err, response);
-                            else {
-                                request.session.name=email;
-                                request.session.user=userToSave;
-                                request.session.auth=true;
-                                response.redirect("home");
-                            }
-                        });
+                    	crypto.randomBytes(24, function (err, bytes) {
+                    		  var userToSave = {'email':email
+                    			  , 'password':hash
+                    			  , 'createdOn':new Date()
+                    			  , 'scriptId':bytes.toString('base64')
+                    		  };
+                    		  userController.save(userToSave, function(err) {
+                    			  if(err) return renderError(err, response);
+                    			  else {
+                    				  request.session.name=email;
+                    				  request.session.user=userToSave;
+                    				  request.session.auth=true;
+                    				  response.redirect("home");
+                    			  }
+                    		  });
+                		});
                     }
                 });
              });
