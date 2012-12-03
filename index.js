@@ -54,6 +54,19 @@ var getUserGreasemonkeyScript = function(request, response) {
 };
 //userScriptId
 
+var userCommentGet = function(request, response) {
+	var userScriptId = request.param('userScriptId');
+	var site = request.param('website');
+	var siteUserId = request.param('userId');
+	commentController.get(userScriptId, site, siteUserId, function(err, commentList) {
+		if(err) return renderError(err, response);
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+	    response.write("Comment gotten.\n");
+	    response.write(commentList);
+	    response.end();
+	});
+};
+
 var addComment = function(request, response) {
 	//app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
 	console.log("processing params:"+JSON.stringify(request.params));
@@ -74,6 +87,7 @@ var addComment = function(request, response) {
 			siteUserId : request.param('userId'),
 			siteUsername : request.param('username'),
 			commentId : request.param('commentId'),
+			createdOn : new Date(),
 			userCommentText : request.query.comment || "none"
 	};
 	commentController.save(theComment, function(err, result) {
@@ -221,6 +235,7 @@ exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
 exports.addComment = addComment;
 exports.profileGet = profileGet;
+exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
 
 exports.setRedisClient = setRedisClient;

@@ -7,8 +7,8 @@ var stdlib = require("../stdlib").stdlib,
         commentDB = dbmux.comments;
     };
 
-var get = function(email, callback) {
-	commentDB.get(email, stdlib.errorClosure(callback, function(commentList) {
+var get = function(userScriptId, site, userId, callback) {
+	commentDB.get(userScriptId, site, userId, stdlib.errorClosure(callback, function(commentList) {
         return callback(null, commentList);
     }));
 };

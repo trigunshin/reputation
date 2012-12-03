@@ -15,6 +15,22 @@ function setCollectionAccessor(getColl) {
     getCollection = getColl(COLL, DB);
 };
 
+var get = function(userScriptId, site, userId, callback) {
+    getCollection(stdlib.errorClosure(callback, function(collection) {
+    	var query = {userScriptId:userScriptId,
+    	    site:site,
+    	    siteUserId:userId
+	    };
+		var sort = [["createdOn",-1]];
+        var opts = {"limit":5, "sort":sort};
+        collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
+        	results.toArray(stdlib.errorClosure(callback, function(items) {
+                callback(null, result);
+        	}));
+        }));
+    }));
+};
+
 var save = function(comment, callback) {
     getCollection(stdlib.errorClosure(callback, function(collection) {
         collection.insert(comment, stdlib.errorClosure(callback, function(result) {
@@ -25,5 +41,6 @@ var save = function(comment, callback) {
 
 exports.setCollectionAccessor = setCollectionAccessor;
 exports.save = save;
+exports.get = get;
 exports.setStdlib = setStdlib;
 exports.setRedis = setRedis;
