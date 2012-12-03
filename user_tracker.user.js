@@ -42,11 +42,11 @@ function sendRequest(requestURL, requestType, params, cb) {
       });
     },
     onSuccess: function(response) {
-      log("success:"+response);
+      console.log("success:"+response);
       if(cb) cb(null, response);
     },
     onFailure: function(response) {
-      log("failed:"+response);
+      console.log("failed:"+response);
       if(cb) cb(response);
     }
   });
@@ -54,35 +54,36 @@ function sendRequest(requestURL, requestType, params, cb) {
 }
 function sendUserReputationData(url, userCommentText) {
   sendRequest(url, 'get', {comment:userCommentText}, function(err, transport) {
-    if(err) {log("error sending data...");return;}
-    log("successfully sent user data");
+    if(err) {console.log("error sending data...");return;}
   });
   return false;
 };
-function getUserReputationData(site, scriptId, userId) {
-  sendRequest(url, 'get', null, function(transport) {
-    if(err) {log("error sending data...");return;}
-    log("sucessfully got user data");
-  });
+function getUserReputationData(url, site, scriptId, userId) {
+  insertScript(url);
   return false;
+};
+function userReputationDataCallback(responseArray) {
+  responseArray = [].concat(responseArray);
+  for(var i=0,iLen=responseArray.length;i<iLen;i++) {
+    console.log("data:"+responseArray[i].userCommentText);
+    //console.log("data:"+JSON.stringify(responseArray[i]));
+    //everything with a userid, add a text element foreach comment...
+    commentDivs = $$(".userId_"+responseArray[i].siteUserId);
+    for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
+      commentDivs[j].insert({bottom:"<div>"+responseArray[i].userCommentText+"</div>"});
+    }
+  }
+  
 };
 
+insertScriptText(insertScript.toString());
 insertScriptText(sendRequest.toString());
 insertScriptText(sendUserReputationData.toString());
 insertScriptText(getUserReputationData.toString());
+insertScriptText(userReputationDataCallback.toString());
 
-var formHTML_1 = " \
-<div id='user_rep_tracker_div'>\
-<form name='input' method='get' onsubmit='return sendUserReputationData(this.senddataurl.value, this.userComment.value);' class='commentSubmitForms'> \
-";
-var formHTML_2 = " \
-<input type='text' name='userComment'> \
-<input type='submit' value='Submit'> \
-<br><a href='#' onClick='return getUserReputationData(this.site.value, this.scriptId.value, this.userId.value);'>Check</a><br> \
-</form> \
-</div>";
-function getFormHTML(commentProperties) {
-  var sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+function getSendDataURL(commentProperties) {
+  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
 	userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
@@ -90,24 +91,49 @@ function getFormHTML(commentProperties) {
     commentProperties.userId,"/",
     commentProperties.commentId,"/add"
   );
-  var getDataURL = "http://reputation.herokuapp.com/userComments/".concat(
+}
+function getGetDataURL(commentProperties) {
+  return "http://reputation.herokuapp.com/userComments/".concat(
     userScriptId,"/",
-    commentProperties.userScriptId,"/",
     commentProperties.curDomain,"/",
-    commentProperties.userId,"/get"
+    commentProperties.userId,"/get?callback= userReputationDataCallback"
   );
-  var inputs = "";
-  inputs.concat("<input type='hidden' name='site' value='"+curDomain+"' />");
-  inputs.concat("<input type='hidden' name='articleId' value='"+articleId+"' />");
-  inputs.concat("<input type='hidden' name='userId' value='"+userId+"' />");
-  inputs.concat("<input type='hidden' name='userName' value='"+userName+"' />");
-  inputs.concat("<input type='hidden' name='userScriptId' value='"+userScriptId+"' />");
-  inputs.concat("<input type='hidden' name='senddataurl' value='"+sendDataURL+"' />");
-  inputs.concat("<input type='hidden' name='getdataurl' value='"+getDataURL+"' />");
-  return formHTML_1 + inputs + formHTML_2;
+}
+function getFormHTMLPrefix(commentProperties) {
+  return "<div id='user_rep_tracker_div' class='userId_"+commentProperties.userId+"'>"
+    +"<form name='input' method='get' onsubmit='return sendUserReputationData(\""
+    +getSendDataURL(commentProperties)
+    +"\", "
+    +"this.userComment.value"
+    +");' class='commentSubmitForms'>";
+    
+};
+function getFormHTMLSuffix(commentProperties) {
+  return "<input type='text' name='userComment'>"
+    +"<input type='submit' value='Submit'>"
+    +"<br><a href='#' onClick='return getUserReputationData(\""
+    +getGetDataURL(commentProperties)
+    +"\",\""+commentProperties.curDomain
+    +"\",\""+userScriptId
+    +"\",\""+commentProperties.userId
+    +"\");'>Check Your Comments on "+commentProperties.userName+"</a><br>"
+    +"</form>"
+    +"</div>";
+};
+function getFormHTML(commentProperties) {
+  var sendDataURL = getSendDataURL(commentProperties);
+  var getDataURL = getGetDataURL(commentProperties);
+  var inputs = "".concat("<input type='hidden' name='site' value='"+ commentProperties.curDomain+"' />"
+  , "<input type='hidden' name='articleId' value='"+ commentProperties.articleId+"' />"
+  , "<input type='hidden' name='userId' value='"+ commentProperties.userId+"' />"
+  , "<input type='hidden' name='userName' value='"+ commentProperties.userName+"' />"
+  , "<input type='hidden' name='userScriptId' value='"+ userScriptId+"' />"
+  , "<input type='hidden' name='sendDataUrl' value='"+sendDataURL+"' />"
+  , "<input type='hidden' name='getDataUrl' value='"+getDataURL+"' />");
+  return getFormHTMLPrefix(commentProperties) + inputs + getFormHTMLSuffix(commentProperties);
 }
 function insertHTML(aCommentNode, commentProperties) {
-  aCommentNode.insert({bottom:getFormHTML(commentProperties)});
+  aCommentNode.insert({after:getFormHTML(commentProperties)});
 }
 
 var afterDomInsert = function(cb) {
@@ -130,22 +156,23 @@ var afterDomInsert = function(cb) {
           commentId:commentId
         };
 
-        insertHTML(elements[i], commentProperties);//technically this could run >1 times...
+        insertHTML(elements[i].parentNode.firstElementChild, commentProperties);//technically this could run >1 times...
       });
     }
     cb();
   };
 };
 var injectComments = function(forceAll, onComplete) {
-  log("injected forceAll");
   self.get_real_comments(true, afterDomInsert(onComplete));
-  self.get_real_comments = function(){log("already loaded them all!");};
+  self.get_real_comments = function() {
+    //log("already loaded them all!");
+  };
 };
 self.get_real_comments = self.get_ajax_comments;
 self.get_ajax_comments = injectComments;
 
 var injectActions = function() {
-  log("calling add_comment_actions");
+//  log("calling add_comment_actions");
   self.inj_comment_actions();
 //updatePage(forceAll=true)
 //continue_loading_comments();
