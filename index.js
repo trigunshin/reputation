@@ -26,12 +26,12 @@ var commentController = require("./controllers/comments");
 commentController.setDBMux(dbmux);
 
 var scriptFilePrefix, scriptFileSuffix, scriptSplitToken = "// ==/UserScript==\n";
-var idDropIn = "var userScriptId = ";
+var idDropIn = "var userScriptId = '";
 fs.readFile("./user_tracker.user.js", "utf8", function(err, data) {
     if(err) {console.warn("readFile error: ", err);}
     var commentIndex = data.indexOf(scriptSplitToken);
-    filePrefix = data.substring(0, commentIndex + scriptSplitToken.length);
-    fileSuffix = data.substring(commentIndex + scriptSplitToken.length);
+    scriptFilePrefix = data.substring(0, commentIndex + scriptSplitToken.length);
+    scriptFileSuffix = data.substring(commentIndex + scriptSplitToken.length);
 });
 
 /* Route Handlers */
@@ -43,12 +43,13 @@ var index = function(request, response) {
 
 var profileGet = function(request, response) {
     response.render(__dirname+"/views/profile", {
-        title:"So it begins."
+        title:"So it begins.",
+        scriptId:request.session.user.scriptId
     });
 };
 
 var getUserGreasemonkeyScript = function(request, response) {
-	var userTokenLine = idDropIn + session.user.scriptId + ";\n";
+	var userTokenLine = idDropIn + request.session.user.scriptId + "';\n";
     sendFile(response, "script.js", scriptFilePrefix + userTokenLine + scriptFileSuffix);
 };
 //userScriptId
@@ -118,7 +119,7 @@ var signupPost = function(request, response) {
                     		  var userToSave = {'email':email
                     			  , 'password':hash
                     			  , 'createdOn':new Date()
-                    			  , 'scriptId':bytes.toString('base64')
+                    			  , 'scriptId':encodeURIComponent(bytes.toString('base64'))
                     		  };
                     		  userController.save(userToSave, function(err) {
                     			  if(err) return renderError(err, response);
