@@ -60,8 +60,8 @@ var userCommentGet = function(request, response) {
 	var siteUserId = request.param('userId');
 	commentController.get(userScriptId, site, siteUserId, function(err, commentList) {
 		if(err) return renderError(err, response);
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-	    response.write("Comment gotten.\n");
+		response.writeHead(200, {'Content-Type': 'text/js'});
+	    //response.write("Comment gotten.\n");
 	    response.write(JSON.stringify(commentList));
 	    response.end();
 	});
