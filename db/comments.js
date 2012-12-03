@@ -25,7 +25,7 @@ var get = function(userScriptId, site, userId, callback) {
         var opts = {"limit":5, "sort":sort};
         collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
         	results.toArray(stdlib.errorClosure(callback, function(items) {
-                callback(null, result);
+                callback(null, items);
         	}));
         }));
     }));
