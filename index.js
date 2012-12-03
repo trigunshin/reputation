@@ -60,10 +60,11 @@ var userCommentGet = function(request, response) {
 	var siteUserId = request.param('userId');
 	commentController.get(userScriptId, site, siteUserId, function(err, commentList) {
 		if(err) return renderError(err, response);
-		response.writeHead(200, {'Content-Type': 'application/javasript'});
+		//response.writeHead(200, {'Content-Type': 'application/javasript'});
 	    //response.write("Comment gotten.\n");
-		response.write("alert("+JSON.stringify(commentList)+");");
-	    response.end();
+		//response.write("alert("+JSON.stringify(commentList)+");");
+	    //response.end();
+		response.json(commentList);
 	});
 };
 

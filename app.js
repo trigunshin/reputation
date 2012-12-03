@@ -33,6 +33,7 @@ routes.setRedisClient(client);
 var logstring = ":remote-addr - [:date] \":method :url\" :status len\::res[content-length] 'ref :referrer' :response-time ms";
 var logStream = fs.createWriteStream('./log.log',{flags:'a'});
 app.configure(function(){
+	app.set('jsonp callback', true);
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
     app.use(express.bodyParser());
