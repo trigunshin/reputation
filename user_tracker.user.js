@@ -85,7 +85,7 @@ function insertForm(aCommentNode, commentProperties) {
   aCommentNode.insert({bottom:getFormHTML(commentProperties)});
 }
 
-document.observe('dom:loaded', function(){
+document.observe('dom:loaded', function() {
 //log("prototypes");
 });
 self.get_real_comments = self.get_ajax_comments;
