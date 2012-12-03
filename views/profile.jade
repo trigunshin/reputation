@@ -1,0 +1,8 @@
+if(!session.auth)
+  a(href="/") Home
+  br
+  .text Login first please
+else
+  a(href="/getUserFile") Download Greasemonkey script.
+  br
+  .text Your script id is: #{session.user.scriptId}
