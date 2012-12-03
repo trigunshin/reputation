@@ -26,11 +26,10 @@ function insertScriptText(scriptText) {
   document.getElementsByTagName('head')[0].appendChild(script_tag);	
 }
 
-
-function sendRequest(requestURL, userComment) {
+function sendRequest(requestURL, requestType, params, cb) {
   new Ajax.Request(requestURL, {
-    method:'get',
-    parameters:{comment:userComment},
+    method:requestType,
+    parameters:params,
     onCreate: function(response) {
       if (response.request.isSameOrigin()) return;
       var t = response.transport; 
@@ -44,26 +43,46 @@ function sendRequest(requestURL, userComment) {
     },
     onSuccess: function(response) {
       log("success:"+response);
+      if(cb) cb(null, response);
     },
     onFailure: function(response) {
       log("failed:"+response);
+      if(cb) cb(response);
     }
   });
   return false;
 }
+function sendUserReputationData(url, userCommentText) {
+  sendRequest(url, 'get', {comment:userCommentText}, function(err, transport) {
+    if(err) {log("error sending data...");return;}
+    log("successfully sent user data");
+  });
+  return false;
+};
+function getUserReputationData(site, scriptId, userId) {
+  sendRequest(url, 'get', null, function(transport) {
+    if(err) {log("error sending data...");return;}
+    log("sucessfully got user data");
+  });
+  return false;
+};
+
 insertScriptText(sendRequest.toString());
+insertScriptText(sendUserReputationData.toString());
+insertScriptText(getUserReputationData.toString());
+
 var formHTML_1 = " \
-<div id='user_tracker_div'>\
-<form name='input' method='get' onsubmit='return sendRequest(this.dataurl.value, this.userComment.value);' class='commentSubmitForms'> \
+<div id='user_rep_tracker_div'>\
+<form name='input' method='get' onsubmit='return sendUserReputationData(this.senddataurl.value, this.userComment.value);' class='commentSubmitForms'> \
 ";
 var formHTML_2 = " \
 <input type='text' name='userComment'> \
 <input type='submit' value='Submit'> \
+<br><a href='#' onClick='return getUserReputationData(this.site.value, this.scriptId.value, this.userId.value);'>Check</a><br> \
 </form> \
-<br><a href='#' onClick='return getUserReputationData();'>Check</a><br> \
 </div>";
 function getFormHTML(commentProperties) {
-  var dataURL = "http://reputation.herokuapp.com/userData/".concat(
+  var sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
 	userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
@@ -71,8 +90,21 @@ function getFormHTML(commentProperties) {
     commentProperties.userId,"/",
     commentProperties.commentId,"/add"
   );
-  var urlInput = "<input type='hidden' name='dataurl' value='"+dataURL+"' />";
-  return formHTML_1 + urlInput + formHTML_2;
+  var getDataURL = "http://reputation.herokuapp.com/userComments/".concat(
+    userScriptId,"/",
+    commentProperties.userScriptId,"/",
+    commentProperties.curDomain,"/",
+    commentProperties.userId,"/get"
+  );
+  var inputs = "";
+  inputs.concat("<input type='hidden' name='site' value='"+curDomain+"' />");
+  inputs.concat("<input type='hidden' name='articleId' value='"+articleId+"' />");
+  inputs.concat("<input type='hidden' name='userId' value='"+userId+"' />");
+  inputs.concat("<input type='hidden' name='userName' value='"+userName+"' />");
+  inputs.concat("<input type='hidden' name='userScriptId' value='"+userScriptId+"' />");
+  inputs.concat("<input type='hidden' name='senddataurl' value='"+sendDataURL+"' />");
+  inputs.concat("<input type='hidden' name='getdataurl' value='"+getDataURL+"' />");
+  return formHTML_1 + inputs + formHTML_2;
 }
 function insertHTML(aCommentNode, commentProperties) {
   aCommentNode.insert({bottom:getFormHTML(commentProperties)});
