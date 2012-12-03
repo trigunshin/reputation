@@ -28,11 +28,7 @@ function insertScriptText(scriptText) {
 
 
 function sendRequest(requestURL, userComment) {
-  //alert("hue.url:"+requestURL);
-  //alert("hue.comment:"+userComment);
-  //'http://reputation.herokuapp.com/'
   new Ajax.Request(requestURL, {
-  //new Ajax.Request('http://reputation.herokuapp.com/', {
     method:'get',
     parameters:{comment:userComment},
     onCreate: function(response) {
@@ -47,28 +43,25 @@ function sendRequest(requestURL, userComment) {
       });
     },
     onSuccess: function(response) {
-        // yada yada yada
-        alert("success:"+response);
+      log("success:"+response);
     },
     onFailure: function(response) {
-        // yada yada yada
-    	alert("failed:"+response);
+      log("failed:"+response);
     }
   });
   return false;
 }
-//<form name='input' method='get' onsubmit="+requestOnClickString+" class='commentSubmitForms'> \
-//<form name='input' method='get' onsubmit='return sendRequest();' class='commentSubmitForms'> \
 insertScriptText(sendRequest.toString());
-//var requestOnClickString = "(" + sendRequest + ")();";
 var formHTML_1 = " \
+<div id='user_tracker_div'>\
 <form name='input' method='get' onsubmit='return sendRequest(this.dataurl.value, this.userComment.value);' class='commentSubmitForms'> \
 ";
 var formHTML_2 = " \
 <input type='text' name='userComment'> \
 <input type='submit' value='Submit'> \
 </form> \
-";
+<br><a href='#' onClick='return getUserReputationData();'>Check</a><br> \
+</div>";
 function getFormHTML(commentProperties) {
   var dataURL = "http://reputation.herokuapp.com/userData/".concat(
 	userScriptId,"/",
@@ -81,19 +74,15 @@ function getFormHTML(commentProperties) {
   var urlInput = "<input type='hidden' name='dataurl' value='"+dataURL+"' />";
   return formHTML_1 + urlInput + formHTML_2;
 }
-function insertForm(aCommentNode, commentProperties) {
+function insertHTML(aCommentNode, commentProperties) {
   aCommentNode.insert({bottom:getFormHTML(commentProperties)});
 }
 
-self.get_real_comments = self.get_ajax_comments;
 var afterDomInsert = function(cb) {
   return function() {
     var curDomain = document.domain.split('.')[0];
     var articleId = window.location.href.match(/[\d]+/);
     var elements = $$("div.com_info");
-    //log("curSite:"+curDomain);
-    //log("articleId:"+articleId);
-    //log("comment count:"+elements.length);
     for(var i=0,iLen=elements.length;i<iLen;i++) {
       elements[i].select("a.commenter_name").each(function(node) {
         var userName = node.readAttribute('fullname');
@@ -101,10 +90,6 @@ var afterDomInsert = function(cb) {
         var userId = match[0];
         var commentId = match[1];
         var commentText="test";
-        //log("\tusername:"+userName);
-        //log("\tuserid:"+userId);
-        //log("\tcommentid:"+commentId);
-        //log("\tcomment text:"+commentText);
         var commentProperties = {
           curDomain:curDomain,
           articleId:articleId,
@@ -113,10 +98,7 @@ var afterDomInsert = function(cb) {
           commentId:commentId
         };
 
-        insertForm(elements[i], commentProperties);//technically this could run >1 times...
-        //var someURL = "//www.tradeslow.com/userData/".concat(curDomain,"/",articleId,"/",userName,"/",userId,"/",commentId,"/?comment=",commentText);
-        //log("srcURL:"+someURL);
-        //insertScript(someURL);
+        insertHTML(elements[i], commentProperties);//technically this could run >1 times...
       });
     }
     cb();
@@ -124,29 +106,21 @@ var afterDomInsert = function(cb) {
 };
 var injectComments = function(forceAll, onComplete) {
   log("injected forceAll");
-  log("onComplete:"+onComplete);
-  //self.UserClickedContinue = true;
   self.get_real_comments(true, afterDomInsert(onComplete));
   self.get_real_comments = function(){log("already loaded them all!");};
 };
+self.get_real_comments = self.get_ajax_comments;
 self.get_ajax_comments = injectComments;
-document.observe('dom:loaded', function() {
-  //log("prototypes");
-});
-//log("calling injects…");
-//self.get_real_comments(true, function(){;});
 
-//log("add actions:"+self.add_comment_actions);
-var inj_comment_actions = self.add_comment_actions;
 var injectActions = function() {
   log("calling add_comment_actions");
-  inj_comment_actions();
-  log("trying to force comments now…");
-  //self.get_real_comments(true, function(){;});
-//
-//continue_loading_comments();
+  self.inj_comment_actions();
 //updatePage(forceAll=true)
-//
+//continue_loading_comments();
   self.continue_loading_comments();
 };
+self.inj_comment_actions = self.add_comment_actions;
 self.add_comment_actions = injectActions;
+
+document.observe('dom:loaded', function() {
+});
