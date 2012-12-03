@@ -10,7 +10,6 @@ function log(msg) {
     throw( new Error('hue: ' + msg, "") );
   });
 }
-log("hue");
 function insertScript(script_url) {
     var script_tag = document.createElement('script');
     script_tag.type = "text/javascript";
@@ -86,9 +85,6 @@ function insertForm(aCommentNode, commentProperties) {
   aCommentNode.insert({bottom:getFormHTML(commentProperties)});
 }
 
-document.observe('dom:loaded', function() {
-//log("prototypes");
-});
 self.get_real_comments = self.get_ajax_comments;
 var afterDomInsert = function(cb) {
   return function() {
@@ -128,9 +124,29 @@ var afterDomInsert = function(cb) {
 };
 var injectComments = function(forceAll, onComplete) {
   log("injected forceAll");
+  log("onComplete:"+onComplete);
+  //self.UserClickedContinue = true;
   self.get_real_comments(true, afterDomInsert(onComplete));
   self.get_real_comments = function(){log("already loaded them all!");};
-  //log("isUpdating:"+self.isUpdating);
-  //self.isUpdating = false;
 };
 self.get_ajax_comments = injectComments;
+document.observe('dom:loaded', function() {
+  //log("prototypes");
+});
+//log("calling injects…");
+//self.get_real_comments(true, function(){;});
+
+//log("add actions:"+self.add_comment_actions);
+var inj_comment_actions = self.add_comment_actions;
+var injectActions = function() {
+  log("calling add_comment_actions");
+  inj_comment_actions();
+  log("trying to force comments now…");
+  //self.get_real_comments(true, function(){;});
+//
+//continue_loading_comments();
+//updatePage(forceAll=true)
+//
+  self.continue_loading_comments();
+};
+self.add_comment_actions = injectActions;
