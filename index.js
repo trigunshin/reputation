@@ -74,8 +74,7 @@ var addComment = function(request, response) {
 			siteUserId : request.param('userId'),
 			siteUsername : request.param('username'),
 			commentId : request.param('commentId'),
-			commentText : request.query.comment || "none",
-			email : "test@test.com"
+			userCommentText : request.query.comment || "none"
 	};
 	commentController.save(theComment, function(err, result) {
 		if(err) return renderError(err, response);
