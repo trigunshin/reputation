@@ -64,7 +64,8 @@ app.get('/signup', routes.signupGet);
 app.post('/login', routes.loginPost);
 app.post('/signup', routes.signupPost);
 
-app.get('/userData/:website/:articleId/:username/:userId/:commentId/add', routes.addComment);
+app.get('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentId/add', routes.addComment);
+app.get('/getUserFile', routes.getUserGreasemonkeyScript);
 
 app.get('/', routes.index);
 
