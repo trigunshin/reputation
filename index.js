@@ -1,10 +1,10 @@
 //var stripeConf = require("./conf/stripeConf");
 var check = require('validator').check;
 var requestLib = require("request");
-var querystring = require("querystring");
-var content = require("./content")['ext'];
-var url = require("url");
-var fs = require("fs"),
+var querystring = require("querystring"),
+    content = require("./content")['ext'],
+    url = require("url"),
+    fs = require("fs"),
     crypto = require("crypto");
 
 /*handle injections*/
@@ -25,23 +25,43 @@ userController.setDBMux(dbmux);
 var commentController = require("./controllers/comments");
 commentController.setDBMux(dbmux);
 
+var scriptFilePrefix, scriptFileSuffix, scriptSplitToken = "// ==/UserScript==\n";
+var idDropIn = "var userScriptId = ";
+fs.readFile("./user_tracker.user.js", "utf8", function(err, data) {
+    if(err) {console.warn("readFile error: ", err);}
+    var commentIndex = data.indexOf(scriptSplitToken);
+    filePrefix = data.substring(0, commentIndex + scriptSplitToken.length);
+    fileSuffix = data.substring(commentIndex + scriptSplitToken.length);
+});
+
+/* Route Handlers */
 var index = function(request, response) {
     response.render(__dirname+"/views/index", {
         title:"So it begins."
     });
 };
 
+var getUserGreasemonkeyScript = function(request, response) {
+	var userTokenLine = idDropIn + session.user.scriptId + ";\n";
+    sendFile(response, "script.js", scriptFilePrefix + userTokenLine + scriptFileSuffix);
+};
+//userScriptId
+
 var addComment = function(request, response) {
-	//app.get('/userData/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+	//app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
 	console.log("processing params:"+JSON.stringify(request.params));
 	console.log("processing query:"+JSON.stringify(request.query));
+	/*
+	var userScriptId = request.param('userScriptId');
 	var site = request.param('website');
 	var articleId = request.param('articleId');
 	var siteUserId = request.param('userId');
 	var siteUsername = request.param('username');
 	var commentId = request.param('commentId');
 	var commentText = request.query.comment || "none";
+	*/
 	var theComment = {
+			'userScriptId' : request.param('userScriptId'),
 			site : request.param('website'),
 			articleId : request.param('articleId'),
 			siteUserId : request.param('userId'),
@@ -194,6 +214,7 @@ exports.signupPost = signupPost;
 exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
 exports.addComment = addComment;
+exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
 
 exports.setRedisClient = setRedisClient;
 exports.setStdlib = setStdlib;
