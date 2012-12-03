@@ -62,7 +62,7 @@ var userCommentGet = function(request, response) {
 		if(err) return renderError(err, response);
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 	    response.write("Comment gotten.\n");
-	    response.write(commentList);
+	    response.write(JSON.stringify(commentList));
 	    response.end();
 	});
 };
