@@ -41,6 +41,12 @@ var index = function(request, response) {
     });
 };
 
+var index = function(request, response) {
+    response.render(__dirname+"/views/profile", {
+        title:"So it begins."
+    });
+};
+
 var getUserGreasemonkeyScript = function(request, response) {
 	var userTokenLine = idDropIn + session.user.scriptId + ";\n";
     sendFile(response, "script.js", scriptFilePrefix + userTokenLine + scriptFileSuffix);
