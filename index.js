@@ -30,7 +30,7 @@ var scriptSplitToken = "// ==/UserScript==\n";
 var scriptFileDict = {};
 var idDropIn = "var userScriptId = '";
 // For our tracked sites, read in the appropriate chunks
-var sites = ["seeking_alpha"];
+var sites = ["seeking_alpha", 'ycombinator'];
 for(var i=0,iLen=sites.length;i<iLen;i++) {
 	readDataForSite(sites[i]);
 }
