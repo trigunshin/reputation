@@ -1,0 +1,12 @@
+script(type="text/javascript")
+    window.setTimeout(function() {
+        //replace simulates HTTP redirect
+        window.location.replace($("a#a_redir")[0].href);
+        //href = '' simulates a user click
+        //window.location.href = $("a#a_redir")[0].href;
+        
+    }, 3000);
+
+p #{msg}
+p Redirecting in 3 seconds...
+a(href="#{redirectTo}",id="a_redir") Go Now
