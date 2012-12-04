@@ -6,6 +6,7 @@ else
   .text Your script id is: #{scriptId}
   br
   -for site in sites
-    a(href="/getUserFile/#{site}/#{site}.user.js") Install Greasemonkey script.
+    h2 #{site}
+    a(href="/getUserFile/#{site}/#{site}.user.js") Install #{site} Greasemonkey script.
     br
-    a(href="/getUserFile/#{site}/get") View Greasemonkey script.
+    a(href="/getUserFile/#{site}/get") View #{site} Greasemonkey script.
