@@ -63,8 +63,6 @@ var profileGet = function(request, response) {
 
 var getUserGreasemonkeyScript = function(request, response) {
 	var site = request.param('site').toString();//this can error out for now, site should be required
-	console.log("get file for site:"+site);
-	console.log("dict:"+JSON.stringify(scriptFileDict));
 	var userTokenLine = idDropIn + request.session.user.scriptId + "';\n";
     sendFile(response, site+"_script.js", scriptFileDict[site].prefix + userTokenLine + scriptFileDict[site].suffix);
 };
