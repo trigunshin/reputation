@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name          User Tracker
+// @name          SeekingAlpha User Tracker 
 // @include       http://seekingalpha.com/article/*
 // @grant         none
 // ==/UserScript==
