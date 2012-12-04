@@ -3,8 +3,9 @@ if(!session.auth)
   br
   .text Login first please
 else
-  a(href="/getUserFile/user_tracker.user.js") Install Greasemonkey script.
-  br
-  a(href="/getUserFile") View Greasemonkey script.
-  br
   .text Your script id is: #{scriptId}
+  br
+  -for site in sites
+    a(href="/getUserFile/#{site}/#{site}.user.js") Install Greasemonkey script.
+    br
+    a(href="/getUserFile/#{site}/get") View Greasemonkey script.

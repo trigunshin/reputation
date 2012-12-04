@@ -26,13 +26,20 @@ var commentController = require("./controllers/comments");
 commentController.setDBMux(dbmux);
 
 var scriptFilePrefix, scriptFileSuffix, scriptSplitToken = "// ==/UserScript==\n";
+var scriptFileDict = {};
 var idDropIn = "var userScriptId = '";
-fs.readFile("./user_tracker.user.js", "utf8", function(err, data) {
-    if(err) {console.warn("readFile error: ", err);}
-    var commentIndex = data.indexOf(scriptSplitToken);
-    scriptFilePrefix = data.substring(0, commentIndex + scriptSplitToken.length);
-    scriptFileSuffix = data.substring(commentIndex + scriptSplitToken.length);
-});
+/* For our tracked sites, read in the appropriate chunks. */
+var sites = ["seeking_alpha"];
+for(var i=0,iLen=sites.length;i<iLen;i++) {
+	var tmp = {};
+	fs.readFile("./"+sites[i]+".user.js", "utf8", function(err, data) {
+		if(err) {console.warn("readFile error: ", err);}
+		var commentIndex = data.indexOf(scriptSplitToken);
+		tmp.prefix = data.substring(0, commentIndex + scriptSplitToken.length);
+		tmp.suffix = data.substring(commentIndex + scriptSplitToken.length);
+		scriptFileDict[sites[i]] = tmp;
+	});
+}
 
 /* Route Handlers */
 var index = function(request, response) {
@@ -44,15 +51,16 @@ var index = function(request, response) {
 var profileGet = function(request, response) {
     response.render(__dirname+"/views/profile", {
         title:"So it begins.",
+        sites:sites,
         scriptId:request.session.user.scriptId
     });
 };
 
 var getUserGreasemonkeyScript = function(request, response) {
+	var site = request.param('site').toString();//this can error out for now, site should be required
 	var userTokenLine = idDropIn + request.session.user.scriptId + "';\n";
-    sendFile(response, "script.js", scriptFilePrefix + userTokenLine + scriptFileSuffix);
+    sendFile(response, site+"_script.js", scriptFileDict[site].prefix + userTokenLine + scriptFileDict[site].suffix);
 };
-//userScriptId
 
 var userCommentGet = function(request, response) {
 	var userScriptId = request.param('userScriptId');
@@ -60,10 +68,6 @@ var userCommentGet = function(request, response) {
 	var siteUserId = request.param('userId');
 	commentController.get(userScriptId, site, siteUserId, function(err, commentList) {
 		if(err) return renderError(err, response);
-		//response.writeHead(200, {'Content-Type': 'application/javasript'});
-	    //response.write("Comment gotten.\n");
-		//response.write("alert("+JSON.stringify(commentList)+");");
-	    //response.end();
 		response.json(commentList);
 	});
 };

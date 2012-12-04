@@ -68,8 +68,8 @@ app.post('/signup', routes.signupPost);
 app.get('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentId/add', routes.addComment);
 app.get('/userComments/:userScriptId/:website/:userId/get', routes.userCommentGet);
 
-app.get('/getUserFile', routes.getUserGreasemonkeyScript);
-app.get('/getUserFile/user_tracker.user.js', routes.getUserGreasemonkeyScript);
+app.get('/getUserFile/:site/get', routes.getUserGreasemonkeyScript);
+app.get('/getUserFile/:site/*.user.js', routes.getUserGreasemonkeyScript);
 app.get('/profile', routes.profileGet);
 
 app.get('/', routes.index);
