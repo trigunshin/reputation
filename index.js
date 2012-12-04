@@ -25,21 +25,26 @@ userController.setDBMux(dbmux);
 var commentController = require("./controllers/comments");
 commentController.setDBMux(dbmux);
 
-var scriptFilePrefix, scriptFileSuffix, scriptSplitToken = "// ==/UserScript==\n";
+/* Greasemonkey file setup */
+var scriptSplitToken = "// ==/UserScript==\n";
 var scriptFileDict = {};
 var idDropIn = "var userScriptId = '";
-/* For our tracked sites, read in the appropriate chunks. */
+// For our tracked sites, read in the appropriate chunks
 var sites = ["seeking_alpha"];
 for(var i=0,iLen=sites.length;i<iLen;i++) {
+	readDataForSite(sites[i]);
+}
+function readDataForSite(aSite) {
 	var tmp = {};
-	fs.readFile("./"+sites[i]+".user.js", "utf8", function(err, data) {
+	fs.readFile("./"+aSite+".user.js", "utf8", function(err, data) {
 		if(err) {console.warn("readFile error: ", err);}
 		var commentIndex = data.indexOf(scriptSplitToken);
 		tmp.prefix = data.substring(0, commentIndex + scriptSplitToken.length);
 		tmp.suffix = data.substring(commentIndex + scriptSplitToken.length);
-		scriptFileDict[sites[i]] = tmp;
+		console.log("storing site:"+aSite);
+		scriptFileDict[aSite] = tmp;
 	});
-}
+};
 
 /* Route Handlers */
 var index = function(request, response) {
@@ -58,6 +63,8 @@ var profileGet = function(request, response) {
 
 var getUserGreasemonkeyScript = function(request, response) {
 	var site = request.param('site').toString();//this can error out for now, site should be required
+	console.log("get file for site:"+site);
+	console.log("dict:"+JSON.stringify(scriptFileDict));
 	var userTokenLine = idDropIn + request.session.user.scriptId + "';\n";
     sendFile(response, site+"_script.js", scriptFileDict[site].prefix + userTokenLine + scriptFileDict[site].suffix);
 };
