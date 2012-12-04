@@ -1,0 +1,174 @@
+// ==UserScript==
+// @name          YCombinator User Tracker 
+// @include       http://news.ycombinator.com/item?id=*
+// @grant         none
+// @require       https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js
+// ==/UserScript==
+var startTime = (new Date()).getTime();
+function log(msg) {
+  var milliseconds = (new Date()).getTime() - startTime;
+  window.setTimeout(function () {
+    throw( new Error('hue: ' + msg, "") );
+  });
+}
+function insertScript(script_url) {
+    var script_tag = document.createElement('script');
+    script_tag.type = "text/javascript";
+    script_tag.src = script_url;
+    document.getElementsByTagName('head')[0].appendChild(script_tag);
+}
+function insertScriptText(scriptText) {
+  var script_tag = document.createElement('script');
+  script_tag.type = "text/javascript";
+  
+  var script = document.createTextNode(scriptText);
+  script_tag.appendChild(script);
+  
+  document.getElementsByTagName('head')[0].appendChild(script_tag);	
+}
+
+function sendRequest(requestURL, requestType, params, cb) {
+  new Ajax.Request(requestURL, {
+    method:requestType,
+    parameters:params,
+    onCreate: function(response) {
+      if (response.request.isSameOrigin()) return;
+      var t = response.transport; 
+      t.setRequestHeader = t.setRequestHeader.wrap(function(original, k, v) { 
+        if (/^(accept|accept-language|content-language)$/i.test(k))
+          return original(k, v);
+        if (/^content-type$/i.test(k) && /^(application\/x-www-form-urlencoded|multipart\/form-data|text\/plain)(;.+)?$/i.test(v)) 
+          return original(k, v);
+        return;
+      });
+    },
+    onSuccess: function(response) {
+      console.log("success:"+response);
+      if(cb) cb(null, response);
+    },
+    onFailure: function(response) {
+      console.log("failed:"+response);
+      if(cb) cb(response);
+    }
+  });
+  return false;
+}
+function sendUserReputationData(url, userCommentText) {
+  sendRequest(url, 'get', {comment:userCommentText}, function(err, transport) {
+    if(err) {console.log("error sending data...");return;}
+  });
+  return false;
+};
+function getUserReputationData(url, site, scriptId, userId) {
+  insertScript(url);
+  return false;
+};
+function userReputationDataCallback(responseArray) {
+  if(!responseArray || !responseArray.length) return false;
+  responseArray = [].concat(responseArray);
+  var localSiteUserId = responseArray[0].siteUserId;
+
+  var commentDivs = $$(".comments_about_user_id_"+localSiteUserId);
+  for(var i=0,iLen = commentDivs.length;i<iLen;i++) {
+    commentDivs[i].remove();
+  }
+  var commentDivs = $$(".userId_"+localSiteUserId);
+  for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
+    for(var i=0,iLen=responseArray.length;i<iLen;i++) {
+      var tmp = "<div class='comments_about_user_id_"
+        + responseArray[i].siteUserId
+        + "'>"+responseArray[i].userCommentText+"</div>";
+      commentDivs[j].insert({bottom:tmp});
+    }
+    commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+localSiteUserId+"'>"});
+  }
+  
+};
+
+insertScriptText(insertScript.toString());
+insertScriptText(sendRequest.toString());
+insertScriptText(sendUserReputationData.toString());
+insertScriptText(getUserReputationData.toString());
+insertScriptText(userReputationDataCallback.toString());
+
+function getSendDataURL(commentProperties) {
+  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+	userScriptId,"/",
+    commentProperties.curDomain,"/",
+    commentProperties.articleId,"/",
+    commentProperties.userName,"/",
+    commentProperties.userId,"/",
+    commentProperties.commentId,"/add"
+  );
+}
+function getGetDataURL(commentProperties) {
+  return "http://reputation.herokuapp.com/userComments/".concat(
+    userScriptId,"/",
+    commentProperties.curDomain,"/",
+    commentProperties.userId,"/get?callback= userReputationDataCallback"
+  );
+}
+function getFormHTMLPrefix(commentProperties) {
+  return "<div id='user_rep_tracker_div' class='userId_"+commentProperties.userId+"'>"
+    +"<form name='input' method='get' onsubmit='return sendUserReputationData(\""
+    +getSendDataURL(commentProperties)
+    +"\", "
+    +"this.userComment.value"
+    +");' class='commentSubmitForms'>";
+    
+};
+function getFormHTMLSuffix(commentProperties) {
+  return "<input type='text' name='userComment'>"
+    +"<input type='submit' value='Submit'>"
+    +"<br><a href='#' onClick='return getUserReputationData(\""
+    +getGetDataURL(commentProperties)
+    +"\",\""+commentProperties.curDomain
+    +"\",\""+userScriptId
+    +"\",\""+commentProperties.userId
+    +"\");'>Check Your Comments on "+commentProperties.userName+"</a><br>"
+    +"</form>"
+    +"</div>";
+};
+function getFormHTML(commentProperties) {
+  var sendDataURL = getSendDataURL(commentProperties);
+  var getDataURL = getGetDataURL(commentProperties);
+  var inputs = "".concat("<input type='hidden' name='site' value='"+ commentProperties.curDomain+"' />"
+  , "<input type='hidden' name='articleId' value='"+ commentProperties.articleId+"' />"
+  , "<input type='hidden' name='userId' value='"+ commentProperties.userId+"' />"
+  , "<input type='hidden' name='userName' value='"+ commentProperties.userName+"' />"
+  , "<input type='hidden' name='userScriptId' value='"+ userScriptId+"' />"
+  , "<input type='hidden' name='sendDataUrl' value='"+sendDataURL+"' />"
+  , "<input type='hidden' name='getDataUrl' value='"+getDataURL+"' />");
+  return getFormHTMLPrefix(commentProperties) + inputs + getFormHTMLSuffix(commentProperties);
+}
+function insertHTML(aCommentNode, commentProperties) {
+  aCommentNode.insert({after:getFormHTML(commentProperties)});
+}
+
+//specific to HN
+alert("hue!");
+console.log($$("span.comhead").length);
+var comheads = $$("span.comhead");
+//skip first one, its the title of the page
+var articleId = window.location.href.split('=')[1];
+var curDomain = document.domain;
+for(var i=1,iLen=comheads.length;i<iLen;i++) {
+  var comHead = comheads[i];
+  anchors = comHead.select("a");
+  var userName = anchors[0].readAttribute('href').split('=')[1];
+  var userId = userName;
+  var commentId = anchors[1].readAttribute('href').split('=')[1];
+  
+  var commentProperties = {
+    curDomain:curDomain,
+    articleId:articleId,
+    userName:userName,
+    userId:userId,
+    commentId:commentId
+  };
+  
+  insertHTML(comHead, commentProperties);
+}
+
+document.observe('dom:loaded', function() {
+});
