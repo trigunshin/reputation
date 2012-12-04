@@ -63,15 +63,25 @@ function getUserReputationData(url, site, scriptId, userId) {
   return false;
 };
 function userReputationDataCallback(responseArray) {
+  if(!responseArray) return false;
   responseArray = [].concat(responseArray);
-  for(var i=0,iLen=responseArray.length;i<iLen;i++) {
-    console.log("data:"+responseArray[i].userCommentText);
-    //console.log("data:"+JSON.stringify(responseArray[i]));
-    //everything with a userid, add a text element foreach comment...
-    commentDivs = $$(".userId_"+responseArray[i].siteUserId);
-    for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
-      commentDivs[j].insert({bottom:"<div>"+responseArray[i].userCommentText+"</div>"});
+  
+  var localSiteUserId = responseArray[0].siteUserId;
+
+  var commentDivs = $$(".comments_about_user_id_"+localSiteUserId);
+  for(var i=0,iLen = commentDivs.length;i<iLen;i++) {
+    commentDivs[i].remove();
+  }
+  console.log("removed all children");
+  var commentDivs = $$(".userId_"+localSiteUserId);
+  for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
+    for(var i=0,iLen=responseArray.length;i<iLen;i++) {
+      var tmp = "<div class='comments_about_user_id_"
+        + responseArray[i].siteUserId
+        + "'>"+responseArray[i].userCommentText+"</div>";
+      commentDivs[j].insert({bottom:tmp});
     }
+    commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+localSiteUserId+"'>"});
   }
   
 };
