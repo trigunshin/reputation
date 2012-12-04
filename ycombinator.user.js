@@ -2,7 +2,6 @@
 // @name          YCombinator User Tracker 
 // @include       http://news.ycombinator.com/item?id=*
 // @grant         none
-// @require       https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js
 // ==/UserScript==
 var startTime = (new Date()).getTime();
 function log(msg) {
@@ -43,11 +42,11 @@ function sendRequest(requestURL, requestType, params, cb) {
       });
     },
     onSuccess: function(response) {
-      console.log("success:"+response);
+      console.log("success:"+JSON.stringify(response));
       if(cb) cb(null, response);
     },
     onFailure: function(response) {
-      console.log("failed:"+response);
+      console.log("failed:"+JSON.stringify(response));
       if(cb) cb(response);
     }
   });
@@ -132,6 +131,8 @@ function getFormHTMLSuffix(commentProperties) {
 function getFormHTML(commentProperties) {
   var sendDataURL = getSendDataURL(commentProperties);
   var getDataURL = getGetDataURL(commentProperties);
+//console.log("sendDataURL:"+sendDataURL);
+//console.log("getDataURL:"+getDataURL);
   var inputs = "".concat("<input type='hidden' name='site' value='"+ commentProperties.curDomain+"' />"
   , "<input type='hidden' name='articleId' value='"+ commentProperties.articleId+"' />"
   , "<input type='hidden' name='userId' value='"+ commentProperties.userId+"' />"
@@ -146,29 +147,39 @@ function insertHTML(aCommentNode, commentProperties) {
 }
 
 //specific to HN
-alert("hue!");
-console.log($$("span.comhead").length);
-var comheads = $$("span.comhead");
-//skip first one, its the title of the page
-var articleId = window.location.href.split('=')[1];
-var curDomain = document.domain;
-for(var i=1,iLen=comheads.length;i<iLen;i++) {
-  var comHead = comheads[i];
-  anchors = comHead.select("a");
-  var userName = anchors[0].readAttribute('href').split('=')[1];
-  var userId = userName;
-  var commentId = anchors[1].readAttribute('href').split('=')[1];
-  
-  var commentProperties = {
-    curDomain:curDomain,
-    articleId:articleId,
-    userName:userName,
-    userId:userId,
-    commentId:commentId
-  };
-  
-  insertHTML(comHead, commentProperties);
+var scripts = [
+    'https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js'
+];
+for (i in scripts) {
+    var script = document.createElement('script');
+    script.src = scripts[i];
+    document.getElementsByTagName('head')[0].appendChild(script);
 }
+window.addEventListener('load', function(event) {
+  $ = unsafeWindow['window'].$;
+  $$ = unsafeWindow['window'].$$;
+  var comheads = $$("span.comhead");
+  //skip first one, its the title of the page
+  var articleId = window.location.href.split('=')[1];
+  var curDomain = document.domain.split('.')[1];
+  for(var i=1,iLen=comheads.length;i<iLen;i++) {
+    var comHead = comheads[i];
+    anchors = comHead.select("a");
+    var userName = anchors[0].readAttribute('href').split('=')[1];
+    var userId = userName;
+    var commentId = anchors[1].readAttribute('href').split('=')[1];
+    
+    var commentProperties = {
+      curDomain:curDomain,
+      articleId:articleId,
+      userName:userName,
+      userId:userId,
+      commentId:commentId
+    };
+    
+    insertHTML(comHead, commentProperties);
+  }
 
-document.observe('dom:loaded', function() {
+  document.observe('dom:loaded', function() {
+  });
 });
