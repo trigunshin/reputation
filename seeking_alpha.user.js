@@ -63,16 +63,14 @@ function getUserReputationData(url, site, scriptId, userId) {
   return false;
 };
 function userReputationDataCallback(responseArray) {
-  if(!responseArray) return false;
+  if(!responseArray || !responseArray.length) return false;
   responseArray = [].concat(responseArray);
-  
   var localSiteUserId = responseArray[0].siteUserId;
 
   var commentDivs = $$(".comments_about_user_id_"+localSiteUserId);
   for(var i=0,iLen = commentDivs.length;i<iLen;i++) {
     commentDivs[i].remove();
   }
-  console.log("removed all children");
   var commentDivs = $$(".userId_"+localSiteUserId);
   for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
     for(var i=0,iLen=responseArray.length;i<iLen;i++) {
