@@ -54,11 +54,15 @@ var index = function(request, response) {
 };
 
 var profileGet = function(request, response) {
-    response.render(__dirname+"/views/profile", {
-        title:"So it begins.",
-        sites:sites,
-        scriptId:request.session.user.scriptId
-    });
+	if(request.session && request.session.user) {
+	    response.render(__dirname+"/views/profile", {
+	        title:"So it begins.",
+	        sites:sites,
+	        scriptId:request.session.user.scriptId
+	    });
+	} else {
+		redirect(response, "Please log in first", "/");
+	}
 };
 
 var getUserGreasemonkeyScript = function(request, response) {
