@@ -53,6 +53,12 @@ var index = function(request, response) {
     });
 };
 
+var sockets = function(request, response) {
+	response.render(__dirname+"/views/sockets", {
+        title:"Socket Toomie."
+    });
+};
+
 var profileGet = function(request, response) {
 	if(request.session && request.session.user) {
 	    response.render(__dirname+"/views/profile", {
@@ -243,6 +249,7 @@ var renderError = function(err,res) {
 
 exports.fileUploadGetHandler = fileUploadGetHandler;
 exports.index = index;
+exports.sockets = sockets;
 exports.signupGet = signupGet;
 exports.signupPost = signupPost;
 exports.logoutGet = logoutGet;

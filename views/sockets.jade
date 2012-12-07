@@ -1,0 +1,15 @@
+//-script(type="text/javascript",src="/js/socket.io.js")
+script(type="text/javascript",src="/socket.io/socket.io.js")
+script
+  var socket = io.connect(window.location.hostname);
+  socket.on('news', function (data) {
+    console.log(data);
+    
+    var dataDiv = document.createElement("div");
+    dataDiv.appendChild(document.createTextNode("message:"+JSON.stringify(data)));
+    $("div#test_messages")[0].appendChild(dataDiv);
+    
+    socket.emit('my other event', { my: 'data' });
+  });
+text "sockets..."
+#test_messages

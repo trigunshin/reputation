@@ -1,12 +1,12 @@
 {
-    "name": "reputation"
-  , "version": "0.0.1"
-  , "private": true
-  , "engines": {
+  "name": "reputation",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
     "node": "0.8.x",
     "npm":  "1.1.x"
-  }
-  , "dependencies": {
+  },
+  "dependencies": {
       "express": "< 2.9.9"
     , "stylus": ">= 0.0.1"
     , "jade": ">= 0.0.1"
@@ -18,5 +18,7 @@
     , "connect-redis":"1.4.5"
     , "bcrypt":"0.7.3"
     , "underscore":">= 1.4.2"
+    , "socket.io":"~ 0.9.11"
+    , "amqp":">= 0.1.0"
   }
 }
