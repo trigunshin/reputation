@@ -1,6 +1,7 @@
 var fs = require('fs');
 var express = require('express'),
 	urlParsing = require('url'),
+	amqp = require('amqp'),
     RedisStore = require('connect-redis')(express),
     app = module.exports = express.createServer();
 
