@@ -109,16 +109,6 @@ app.get('/profile', routes.profileGet);
 app.get('/sockets', routes.sockets);
 app.get('/', routes.index);
 
-app.get('/rabbitTest', function(req, res) { 
-	// your normal server code 
-  	var path = urlParsing.parse(req.url).pathname;
-  	console.log("sending path as message:"+path);
-	sendMsg(path);
-	res.writeHead(200, {'Content-Type':'text/html'});
-	res.write('OK', 'utf8');
-	res.end();
-});
-
 var APP_PORT = process.env.PORT || 3000;
 app.listen(APP_PORT);
 console.log("Express server listening on port %d in %s mode", APP_PORT, app.settings.env);
