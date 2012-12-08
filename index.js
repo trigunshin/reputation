@@ -24,7 +24,7 @@ function setAMQP(anAMQP) {
       'type':'topic',
       'durable':true
     }, function(exch) {
-      emailEchange = exch;
+      emailExchange = exch;
       console.log("emailer exchange open");
     }
   );
