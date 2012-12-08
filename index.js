@@ -9,16 +9,40 @@ var querystring = require("querystring"),
 
 /*handle injections*/
 var dbmux = require("./db/dbmux");
-var stdlib;
-var redisClient;
+var stdlib,
+    rabbitMQ,
+    emailExchange,
+    redisClient;
 function setStdlib(aStdlib) {
     stdlib = aStdlib;
     //dbmux.setStdlib(stdlib);
+};
+function setAMQP(anAMQP) {
+  rabbitMQ = anAMQP;
+  // create the exchange if it doesnt exist
+  rabbitMQ.exchange('rabbitEmailExchange', {
+      'type':'topic',
+      'durable':true
+    }, function(exch) {
+      emailEchange = exch;
+      console.log("emailer exchange open");
+    }
+  );
 };
 function setRedisClient(aRedisClient) {
     redisClient = aRedisClient;
     dbmux.setRedisClient(aRedisClient);
 };
+
+
+function sendMsg(topic, msg) {
+  if(emailExchange) {
+	  emailExchange.publish(topic,msg);
+  }
+  else {
+    console.log("email exchange not around now...");
+  }
+}
 
 var userController = require("./controllers/users");
 userController.setDBMux(dbmux);
@@ -157,6 +181,7 @@ var signupPost = function(request, response) {
                     		  userController.save(userToSave, function(err) {
                     			  if(err) return renderError(err, response);
                     			  else {
+                    				  sendMsg("reputation.email.userSignup", email);
                     				  request.session.name=email;
                     				  request.session.user=userToSave;
                     				  request.session.auth=true;
@@ -260,4 +285,5 @@ exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
 
 exports.setRedisClient = setRedisClient;
+exports.setAMQP = setAMQP;
 exports.setStdlib = setStdlib;

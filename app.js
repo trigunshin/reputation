@@ -50,44 +50,16 @@ io.sockets.on('connection', function (socket) {
 var config = require("./conf/app_conf");
 var amqp_config = config.amqpConfig;
 var amqpUrl = amqp_config.defaultURL;
-var exchange;
-
-function sendMsg(msg) {
-  console.log(msg);
-  if(exchange) {
-    exchange.publish('emails',msg,{},function(errExists){;});
-  } else {
-    console.log("exchange not around now...");
-  }
-}
 var rabbitMQ = amqp.createConnection({url:amqpUrl});
-rabbitMQ.addListener('ready', function() {
-  console.log("rabbit ready");
-  // create the exchange if it doesnt exist
-  rabbitMQ.exchange('rabbitEmailExchange', {
-      'type':'topic',
-      'durable':true
-    }, function(exch) {
-    	exchange = exch;
-    	console.log("exchange open");
-    }
-  );
-});
 rabbitMQ.addListener('error', function(err) {
   console.log("rabbit error:"+err);
 });
-
-
-function sendMsg(msg) {
-  console.log(msg);
-  if(exchange) {
-    exchange.publish('key.a',msg);
-  }
-  else {
-    console.log("exchange not around now...");
-  }
-}
+rabbitMQ.addListener('ready', function() {
+  console.log("rabbit ready");
+  routes.setAMQP(rabbitMQ);
+});
 /*/rabbitMQ */
+
 routes.setStdlib(stdlib);
 routes.setRedisClient(redisClient);
 
