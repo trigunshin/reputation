@@ -2,14 +2,13 @@ var http = require('http'),
 	url = require('url'),
 	amqp = require('amqp'),
 	amqp_config = require("./conf/app_conf").amqpConfig;
-
-var amqpUrl = process.env.CLOUDAMQP_URL || amqp_config.defaultURL;
+var amqpUrl = amqp_config.defaultURL;
 var exchange;
 
 function sendMsg(msg) {
   console.log(msg);
   if(exchange) {
-    exchange.publish('key.a',msg);
+    exchange.publish('emails',msg,{},function(errExists){;});
   } else {
     console.log("exchange not around now...");
   }
@@ -26,8 +25,14 @@ var server = http.createServer(function(req, res) {
 var rabbitMQ = amqp.createConnection({url:amqpUrl});
 rabbitMQ.addListener('ready', function() {
   console.log("rabbit ready");
-  // create the exchange if it doesnt exist
-  exchange = rabbitMQ.exchange('rabbitExchange',{'type':'fanout'});
+  rabbitMQ.exchange('rabbitEmailExchange', {
+      'type':'topic',
+      'durable':true
+    }, function(exch) {
+    	exchange = exch;
+    	console.log("exchange open");
+    }
+  );
 });
 rabbitMQ.addListener('error', function(err) {
   console.log("rabbit error:"+err);

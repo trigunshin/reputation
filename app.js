@@ -34,7 +34,6 @@ io.configure(function () {
   io.set("polling duration", 10);
   io.set("log level", 2);
 });
-
 io.sockets.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
   socket.on('my other event', function (data) {
@@ -44,19 +43,41 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('message',data,time,username);
     socket.emit('message',data,time,username,true);
   });
-//  socket.on('connected',function(username) {
-//    socket.nick = username;
-//    users.push(username);
-//    io.sockets.emit('user_connected',users);
-//  });
-//  socket.on('disconnect',function() {
-//    users.splice(users.indexOf(socket.nick), 1);
-//    socket.broadcast.emit('updated_user_list',users);
-//  });
 });
 
 
 /* Set up RabbitMQ */
+var config = require("./conf/app_conf");
+var amqp_config = config.amqpConfig;
+var amqpUrl = amqp_config.defaultURL;
+var exchange;
+
+function sendMsg(msg) {
+  console.log(msg);
+  if(exchange) {
+    exchange.publish('emails',msg,{},function(errExists){;});
+  } else {
+    console.log("exchange not around now...");
+  }
+}
+var rabbitMQ = amqp.createConnection({url:amqpUrl});
+rabbitMQ.addListener('ready', function() {
+  console.log("rabbit ready");
+  // create the exchange if it doesnt exist
+  rabbitMQ.exchange('rabbitEmailExchange', {
+      'type':'topic',
+      'durable':true
+    }, function(exch) {
+    	exchange = exch;
+    	console.log("exchange open");
+    }
+  );
+});
+rabbitMQ.addListener('error', function(err) {
+  console.log("rabbit error:"+err);
+});
+
+
 function pub_and_sub() {
   var exchange = conn.exchange(''); // get the default exchange
   var queue = conn.queue('queue1', {}, function() { // create a queue
