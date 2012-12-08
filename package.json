@@ -20,6 +20,6 @@
     , "underscore":">= 1.4.2"
     , "socket.io":"~ 0.9.11"
     , "amqp":">= 0.1.0",
-    , "emailjs":"~0.3.3"
+    , "emailjs":"0.3.3"
   }
 }
