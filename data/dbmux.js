@@ -7,7 +7,6 @@ var mongoLabURI = process.env.MONGOLAB_URI;
 var SERVER = process.env.MONGO_HOST || "localhost",
     PORT = process.env.MONGO_PORT || 27017;
 
-var stdlib = require("../stdlib").stdlib;
 var redisClient;
 
 var getMongoLabConnection = function(collectionName) {
@@ -51,7 +50,7 @@ var files = ["users", "comments"];
 var perDBFile = function(applyToSubclass) {
     for(var i=0,iLen=files.length;i<iLen;i++) {
         var curName = files[i];
-        var curObj = exports[curName] || require("./"+curName);//don't require() repeatedly
+        var curObj = exports[curName] || require("./mongoFiles/"+curName);//cache require()
         applyToSubclass(curObj, curName);
     }
 };
