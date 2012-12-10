@@ -9,6 +9,7 @@ var SERVER = process.env.MONGO_HOST || "localhost",
 
 var redisClient;
 
+//TODO these will need to be merged/resolved in the future...
 var getMongoLabConnection = function(collectionName) {
 	var cache = {};
 	var key = collectionName;

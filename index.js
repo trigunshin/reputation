@@ -8,31 +8,39 @@ var querystring = require("querystring"),
     crypto = require("crypto");
 
 /*handle injections*/
-var dbmux = require("./db/dbmux");
+var dbmux = require("./data/dbmux");
 var stdlib,
     rabbitMQ,
     emailExchange,
     redisClient;
 function setStdlib(aStdlib) {
     stdlib = aStdlib;
-    //dbmux.setStdlib(stdlib);
 };
-function setAMQP(anAMQP) {
-  rabbitMQ = anAMQP;
-  // create the exchange if it doesnt exist
-  rabbitMQ.exchange('rabbitEmailExchange', {
-      'type':'topic',
-      'durable':true
-    }, function(exch) {
-      emailExchange = exch;
-      console.log("emailer exchange open");
-    }
-  );
-};
-function setRedisClient(aRedisClient) {
+var EMAIL_SIGNUP_STRING="reputation.email.signup";
+    WELCOME_SIGNUP_STRING="reputation.email.welcome";
+
+function setDataMux(aDataMux) {
+  dataMux = aDataMux;
+  dataMux.getRabbit(function(rabbitClient) {
+    rabbitMQ = rabbitClient;
+    // create the exchange if it doesnt exist
+    rabbitMQ.exchange('rabbitEmailExchange', {
+        'type':'topic',
+        'durable':true
+      }, function(exch) {
+        emailExchange = exch;
+        console.log("emailer exchange open");
+      }
+    );
+  });
+  dataMux.getRedis(function(aRedisClient) {
     redisClient = aRedisClient;
-    dbmux.setRedisClient(aRedisClient);
-};
+    dataMux.getMongo(function(mongoClient) {
+      dbmux = mongoClient;
+      dbmux.setRedisClient(redisClient);
+    });
+  });
+}
 
 
 function sendMsg(topic, msg) {
@@ -60,7 +68,7 @@ for(var i=0,iLen=sites.length;i<iLen;i++) {
 }
 function readDataForSite(aSite) {
 	var tmp = {};
-	fs.readFile("./"+aSite+".user.js", "utf8", function(err, data) {
+	fs.readFile("./userScripts/"+aSite+".user.js", "utf8", function(err, data) {
 		if(err) {console.warn("readFile error: ", err);}
 		var commentIndex = data.indexOf(scriptSplitToken);
 		tmp.prefix = data.substring(0, commentIndex + scriptSplitToken.length);
@@ -181,7 +189,7 @@ var signupPost = function(request, response) {
                     		  userController.save(userToSave, function(err) {
                     			  if(err) return renderError(err, response);
                     			  else {
-                    				  sendMsg("reputation.email.userSignup", email);
+                    				  sendMsg(EMAIL_SIGNUP_STRING, email);
                     				  request.session.name=email;
                     				  request.session.user=userToSave;
                     				  request.session.auth=true;
@@ -284,6 +292,7 @@ exports.profileGet = profileGet;
 exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
 
-exports.setRedisClient = setRedisClient;
-exports.setAMQP = setAMQP;
+exports.setDataMux = setDataMux;
+//exports.setRedisClient = setRedisClient;
+//exports.setAMQP = setAMQP;
 exports.setStdlib = setStdlib;

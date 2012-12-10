@@ -8,23 +8,17 @@ var express = require('express'),
 /*Set up injections to routes module.*/
 var stdlib = require("./stdlib").stdlib,
     routes = require('./index');
-/* Set up redis client */
+routes.setStdlib(stdlib);
+
+/* Set up datamux */
+var datamux = require("./data/datamux");
+routes.setDataMux(datamux);
+/* Set up Redis client */
 var redisClient;
-if (process.env.REDISTOGO_URL) {
-    console.log("Connecting to redis @ url:" + process.env.REDISTOGO_URL);
-    var rtg  = require("url").parse(process.env.REDISTOGO_URL);
-    redisClient = require("redis").createClient(rtg.port, rtg.hostname);
-    redisClient.auth(rtg.auth.split(":")[1]);
-} else if(process.env.REDIS_URL) {
-    console.log("Connecting to redis @ default port on host:" + process.env.REDIS_URL);
-    redisClient = require("redis").createClient(6379, process.env.REDIS_URL);
-} else {
-    console.log("Connecting to redis @ default localhost");
-    redisClient = require("redis").createClient();
-}
-redisClient.on("error", function(err) {
-    console.log("error:" + redisClient.host + ":"+redisClient.port+"-"+err);
+datamux.getRedis(function(redis) {
+  redisClient = redis;
 });
+
 
 /* Set up websockets */
 var socket = require("socket.io");
@@ -44,24 +38,6 @@ io.sockets.on('connection', function (socket) {
     socket.emit('message',data,time,username,true);
   });
 });
-
-
-/* Set up RabbitMQ */
-var config = require("./conf/app_conf");
-var amqp_config = config.amqpConfig;
-var amqpUrl = amqp_config.defaultURL;
-var rabbitMQ = amqp.createConnection({url:amqpUrl});
-rabbitMQ.addListener('error', function(err) {
-  console.log("rabbit error:"+err);
-});
-rabbitMQ.addListener('ready', function() {
-  console.log("rabbit ready");
-  routes.setAMQP(rabbitMQ);
-});
-/*/rabbitMQ */
-
-routes.setStdlib(stdlib);
-routes.setRedisClient(redisClient);
 
 // Configuration
 var logstring = ":remote-addr - [:date] \":method :url\" :status len\::res[content-length] 'ref :referrer' :response-time ms";
