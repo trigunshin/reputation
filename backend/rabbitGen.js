@@ -4,11 +4,11 @@ var http = require('http'),
 	amqp_config = require("./conf/app_conf").amqpConfig;
 var amqpUrl = amqp_config.defaultURL;
 var exchange;
-
+var SIGNUP_STRING="reputation.email.signup";
 function sendMsg(msg) {
   console.log(msg);
   if(exchange) {
-    exchange.publish('emails',msg,{},function(errExists){;});
+    exchange.publish(SIGNUP_STRING,msg,{},function(errExists){;});
   } else {
     console.log("exchange not around now...");
   }
