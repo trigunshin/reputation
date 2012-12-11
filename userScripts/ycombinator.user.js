@@ -165,6 +165,7 @@ window.addEventListener('load', function(event) {
   for(var i=1,iLen=comheads.length;i<iLen;i++) {
     var comHead = comheads[i];
     anchors = comHead.select("a");
+    if(!anchors[0]) continue;
     var userName = anchors[0].readAttribute('href').split('=')[1];
     var userId = userName;
     var commentId = anchors[1].readAttribute('href').split('=')[1];
