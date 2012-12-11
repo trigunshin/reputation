@@ -2,6 +2,8 @@
 // @name          YCombinator User Tracker 
 // @include       http://news.ycombinator.com/item?id=*
 // @grant         none
+// @namespace     reputation.herokuapp.com
+// @version       1.0.0
 // ==/UserScript==
 var startTime = (new Date()).getTime();
 function log(msg) {
@@ -159,10 +161,9 @@ window.addEventListener('load', function(event) {
   $ = unsafeWindow['window'].$;
   $$ = unsafeWindow['window'].$$;
   var comheads = $$("span.comhead");
-  //skip first one, its the title of the page
   var articleId = window.location.href.split('=')[1];
   var curDomain = document.domain.split('.')[1];
-  for(var i=1,iLen=comheads.length;i<iLen;i++) {
+  for(var i=0,iLen=comheads.length;i<iLen;i++) {
     var comHead = comheads[i];
     anchors = comHead.select("a");
     if(!anchors[0]) continue;

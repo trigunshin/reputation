@@ -2,6 +2,8 @@
 // @name          SeekingAlpha User Tracker 
 // @include       http://seekingalpha.com/article/*
 // @grant         none
+// @namespace     reputation.herokuapp.com
+// @version       1.0.0
 // ==/UserScript==
 var startTime = (new Date()).getTime();
 function log(msg) {
