@@ -77,7 +77,5 @@ exports.getByActivationCode = getByActivationCode;
 exports.save = save;
 exports.remove = remove;
 exports.findAndUpdate = findAndUpdate;
-exports.pullFavoriteTicker = pullFavoriteTicker;
-exports.pushFavoriteTicker = pushFavoriteTicker;
 exports.setStdlib = setStdlib;
 exports.setRedis = setRedis;

@@ -5,14 +5,14 @@ var stdlib = require("../stdlib").stdlib, dbmux = null, userDB = null, setDBMux 
   userDB = dbmux.users;
 };
 
-var get = function(email, callback) {
-  userDB.get(email, stdlib.errorClosure(callback, function(userList) {
+var getByEmail = function(email, callback) {
+  userDB.getByEmail(email, stdlib.errorClosure(callback, function(userList) {
     return callback(null, userList[0]);
   }));
 };
 
 var getByActivationCode = function(code, callback) {
-  userDB.get(code, stdlib.errorClosure(callback, function(userList) {
+  userDB.getByActivationCode(code, stdlib.errorClosure(callback, function(userList) {
     return callback(null, userList[0]);
   }));
 };
@@ -24,7 +24,7 @@ var internalSave = function(user, callback) {
 };
 
 var save = function(user, callback) {
-  userDB.get(user.email, function(err, users) {
+  userDB.getByEmail(user.email, function(err, users) {
     if(users && users[0])
       userDB.remove(user.email, function(err, result) {
         internalSave(user, callback);

@@ -169,34 +169,34 @@ var signupGet = function(request, response) {
 
 var generateToken = function(cb) {
   crypto.randomBytes(36, function (err, bytes) {
-    cb(err, byes.toString('hex'));
+    cb(err, bytes.toString('hex'));
   });
 };
 
 var sendActivationEmail = function(userEmail, cb) {
-  generateToken(function(err, activateCode) {
+  generateToken(function(err, activationCode) {
+    console.log("sending activation email w/topic:"+EMAIL_SIGNUP_STRING);
     sendMsg(EMAIL_SIGNUP_STRING, JSON.stringify({
-        email:email,
-        activateToken:activateCode
+        email:userEmail,
+        activationCode:activationCode
       })
     );
-    cb(err, activateCode);
+    cb(err, activationCode);
   });
 };
 
 var activateGet = function(request, response) {
   var token = request.param('token');
-  userController.getByActivationCode(token, function(err, result) {
+  userController.getByActivationCode(token, function(err, user) {
     if(err) return renderError(err, response);
-    if(!result || !result[0]) return renderError({message:"No user found with id:"+token}, response);
-    var user = result[0];
-    var fields = {'token':null};
+    if(!user) return renderError({message:"No user found with id:"+token}, response);
+    var fields = {'activationCode':null};
     userController.findAndUpdate(user.email, fields, function(err, result) {
       if(err) return renderError(err, response);
       request.session.name=user.email;
       request.session.user=user;
       request.session.auth=true;
-      redirect(response, "Thanks for activating!", 'cheap');
+      redirect(response, "Thanks for activating!", 'profile');
     });
   });
 };
@@ -213,30 +213,28 @@ var signupPost = function(request, response) {
         else userController.getByEmail(email, function(err, userResult) {
           if(err) return renderError(err, response);
           else if(userResult) {
-            if(userResult[0])
-              if(userResult[0].activateToken) {//resend the token
-                sendActivationEmail(email, function(err, token) {
+            console.log("result:"+JSON.stringify(userResult));
+            if(userResult.activationCode) {//resend the token
+              sendActivationEmail(email, function(err, token) {
+                if(err) return renderError(err, response);
+                userController.findAndUpdate(email, {"activationCode":token}, function(err) {
                   if(err) return renderError(err, response);
-//                  request.session.name=email;
-//                  request.session.user=userResult[0];
-//                  request.session.auth=true;
-                  redirect(response, "Check your email for the activation link.", 'cheap');
+                  redirect(response, "Check your email for the activation link.", 'profile');
                 });
-              } else {//address already registered
-                return renderError({'message':"Email already exists. Please try another one or login."}, response);
-              }
-            else//address already registered
+              });
+            } else {//address already registered
               return renderError({'message':"Email already exists. Please try another one or login."}, response);
+            }
           } else {
             generateToken(function (err, scriptCode) {
-              sendActivationEmail(email, function(err, activateCode) {
+              sendActivationEmail(email, function(err, activationCode) {
                 if(err) return renderError(err, response);
           		  var userToSave = {
           		      'email':email
           			  , 'password':hash
           			  , 'createdOn':new Date()
           			  , 'scriptId':scriptCode
-          			  , 'activationCode':activateCode
+          			  , 'activationCode':activationCode
           		  };
           		  userController.save(userToSave, function(err) {
           			  if(err) return renderError(err, response);
@@ -244,7 +242,7 @@ var signupPost = function(request, response) {
 //          				  request.session.name=email;
 //          				  request.session.user=userToSave;
 //          				  request.session.auth=true;
-          				  redirect(response, "Check your email for the activation link.", 'cheap');
+          				  redirect(response, "Check your email for the activation link.", 'profile');
           			  }
           		  });
           	  });
@@ -260,33 +258,36 @@ var signupPost = function(request, response) {
 };
 
 var loginPost = function(request, response) {
-    var userEmail = request.body['login']['email'];
-    var userPass = request.body['login']['pass'];
-    var originURL = request.body['login']['url'];
-    
-    userController.getByEmail(userEmail, function(err, user) {
-        if(err) return renderError(err, response);
-        else {
-            if(user && user['password']) {
-                userController.verifyPass(userPass, user['password'], function(err, pwResult) {
-                    if(err) return renderError(err, response);
-                    else if(pwResult) {
-                        console.log(userEmail + " has logged in.");
-                        request.session.name=userEmail;
-                        request.session.user=user;
-                        request.session.auth=true;
-                        response.redirect(originURL);
-                        //redirect(response, "Logged in successfully!", originURL);
-                    } else {
-                    	redirect(response, "Password or username did not match!", originURL);
-                    }
-                });
-            }
-            else {
+  var userEmail = request.body['login']['email'];
+  var userPass = request.body['login']['pass'];
+  var originURL = request.body['login']['url'];
+  
+  userController.getByEmail(userEmail, function(err, user) {
+    if(err) return renderError(err, response);
+    else {
+      if(user) {
+        if(user.activationCode) return redirect(response, "Please check your email for activation link or re-register.", '');
+        else if (user['password']) {
+          userController.verifyPass(userPass, user['password'], function(err, pwResult) {
+            if(err) return renderError(err, response);
+            else if(pwResult) {
+              console.log(userEmail + " has logged in.");
+              request.session.name=userEmail;
+              request.session.user=user;
+              request.session.auth=true;
+              response.redirect(originURL);
+              //redirect(response, "Logged in successfully!", originURL);
+            } else {
             	redirect(response, "Password or username did not match!", originURL);
             }
+          });
         }
-    });
+      }
+      else {
+      	redirect(response, "Password or username did not match!", originURL);
+      }
+    }
+  });
 };
 
 var logoutGet = function(request, response) {
