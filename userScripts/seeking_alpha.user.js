@@ -60,8 +60,8 @@ function sendUserReputationData(url, userCommentText) {
   });
   return false;
 };
-function deleteUserReputationData(url) {
-  sendRequest(url, 'DELETE', {}, function(err, transport) {
+function deleteUserReputationData(url, params) {
+  sendRequest(url, 'DELETE', params, function(err, transport) {
     if(err) {console.log("error sending data...");return;}
   });
   return false;
@@ -72,11 +72,12 @@ function getUserReputationData(url, site, scriptId, userId) {
 };
 function getDeleteLink(userCommentObj) {
   var ret = "<a href='#' ";
+  ret = ret + "id='"+userCommentObj['_id']+"' ";
   var delUrl = getSendDataURLOnPage(userCommentObj, "/remove");
-  
+  var params = {id:userCommentObj['_id']};
   ret = ret + "onClick='return deleteUserReputationData(\""
     + delUrl
-    +"\")'>";
+    +"\", "+params+")'>";
   ret = ret + "Delete</a>";
   return ret;//TODO onClick, remove this particular element
 };
@@ -94,8 +95,10 @@ function userReputationDataCallback(responseArray) {
     for(var i=0,iLen=responseArray.length;i<iLen;i++) {
       var tmp = "<div class='comments_about_user_id_"
         + responseArray[i].siteUserId
-        + "'>"+responseArray[i].userCommentText
-        + "'  '" + getDeleteLink(responseArray[i])
+        + "'>"
+        + getDeleteLink(responseArray[i])
+        + ": "
+        +responseArray[i].userCommentText
         +"</div>";
       commentDivs[j].insert({bottom:tmp});
     }
