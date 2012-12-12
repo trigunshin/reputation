@@ -11,7 +11,7 @@ var get = function(config, cb) {
     console.log("rabbit error:"+err);
   });
   rabbitMQ.addListener('ready', function() {
-    console.log("rabbit ready");
+    console.log("rabbit ready on: "+amqpUrl);
     return cb(rabbitMQ);
   });
 };
