@@ -7,9 +7,12 @@ var querystring = require("querystring"),
     fs = require("fs"),
     crypto = require("crypto");
 
+var userController = require("./controllers/users");
+var commentController = require("./controllers/comments");
+
 /*handle injections*/
-var dbmux = require("./data/dbmux");
-var stdlib,
+var dbmux,// = require("./data/dbmux");
+    stdlib,
     rabbitMQ,
     emailExchange,
     redisClient;
@@ -38,6 +41,9 @@ function setDataMux(aDataMux) {
     dataMux.getMongo(function(mongoClient) {
       dbmux = mongoClient;
       dbmux.setRedisClient(redisClient);
+      
+      userController.setDBMux(dbmux);
+      commentController.setDBMux(dbmux);
     });
   });
 }
@@ -51,11 +57,6 @@ function sendMsg(topic, msg) {
     console.log("email exchange not around now...");
   }
 }
-
-var userController = require("./controllers/users");
-userController.setDBMux(dbmux);
-var commentController = require("./controllers/comments");
-commentController.setDBMux(dbmux);
 
 /* Greasemonkey file setup */
 var scriptSplitToken = "// ==/UserScript==\n";
@@ -166,45 +167,96 @@ var signupGet = function(request, response) {
     );
 };
 
+var generateToken = function(cb) {
+  crypto.randomBytes(36, function (err, bytes) {
+    cb(err, byes.toString('hex'));
+  });
+};
+
+var sendActivationEmail = function(userEmail, cb) {
+  generateToken(function(err, activateCode) {
+    sendMsg(EMAIL_SIGNUP_STRING, JSON.stringify({
+        email:email,
+        activateToken:activateCode
+      })
+    );
+    cb(err, activateCode);
+  });
+};
+
+var activateGet = function(request, response) {
+  var token = request.param('token');
+  userController.getByActivationCode(token, function(err, result) {
+    if(err) return renderError(err, response);
+    if(!result || !result[0]) return renderError({message:"No user found with id:"+token}, response);
+    var user = result[0];
+    var fields = {'token':null};
+    userController.findAndUpdate(user.email, fields, function(err, result) {
+      if(err) return renderError(err, response);
+      request.session.name=user.email;
+      request.session.user=user;
+      request.session.auth=true;
+      redirect(response, "Thanks for activating!", 'cheap');
+    });
+  });
+};
+
 var signupPost = function(request, response) {
-    var email = request.body['user']['email'];
-    var pass = request.body['user']['pass'];
-    var pass1 = request.body['user']['pass1'];
-    try {
-        check(email,"Please enter a valid email.").isEmail();
-        if (pass==pass1) {
-            userController.getPassHash(pass, function(err, hash) {
-                if(err) return renderError(err, response);
-                else userController.get(email, function(err, userResult) {
-                    if(err) return renderError(err, response);
-                    else if(userResult)
-                        return renderError({'message':"Email already exists. Please try another one or login."}, response);
-                    else {
-                    	crypto.randomBytes(24, function (err, bytes) {
-                    		  var userToSave = {'email':email
-                    			  , 'password':hash
-                    			  , 'createdOn':new Date()
-                    			  , 'scriptId':encodeURIComponent(bytes.toString('base64'))
-                    		  };
-                    		  userController.save(userToSave, function(err) {
-                    			  if(err) return renderError(err, response);
-                    			  else {
-                    				  sendMsg(EMAIL_SIGNUP_STRING, email);
-                    				  request.session.name=email;
-                    				  request.session.user=userToSave;
-                    				  request.session.auth=true;
-                    				  response.redirect("home");
-                    			  }
-                    		  });
-                		});
-                    }
+  var email = request.body['user']['email'];
+  var pass = request.body['user']['pass'];
+  var pass1 = request.body['user']['pass1'];
+  try {
+    check(email,"Please enter a valid email.").isEmail();
+    if (pass==pass1) {
+      userController.getPassHash(pass, function(err, hash) {
+        if(err) return renderError(err, response);
+        else userController.getByEmail(email, function(err, userResult) {
+          if(err) return renderError(err, response);
+          else if(userResult) {
+            if(userResult[0])
+              if(userResult[0].activateToken) {//resend the token
+                sendActivationEmail(email, function(err, token) {
+                  if(err) return renderError(err, response);
+//                  request.session.name=email;
+//                  request.session.user=userResult[0];
+//                  request.session.auth=true;
+                  redirect(response, "Check your email for the activation link.", 'cheap');
                 });
-             });
-        } else return renderError({'message':"User passwords did not match!"}, response);
-    } catch (e) {
-        console.log(e.message);
-        signupGet(request, response);
-    }
+              } else {//address already registered
+                return renderError({'message':"Email already exists. Please try another one or login."}, response);
+              }
+            else//address already registered
+              return renderError({'message':"Email already exists. Please try another one or login."}, response);
+          } else {
+            generateToken(function (err, scriptCode) {
+              sendActivationEmail(email, function(err, activateCode) {
+                if(err) return renderError(err, response);
+          		  var userToSave = {
+          		      'email':email
+          			  , 'password':hash
+          			  , 'createdOn':new Date()
+          			  , 'scriptId':scriptCode
+          			  , 'activationCode':activateCode
+          		  };
+          		  userController.save(userToSave, function(err) {
+          			  if(err) return renderError(err, response);
+          			  else {
+//          				  request.session.name=email;
+//          				  request.session.user=userToSave;
+//          				  request.session.auth=true;
+          				  redirect(response, "Check your email for the activation link.", 'cheap');
+          			  }
+          		  });
+          	  });
+            });
+          }
+      	});
+      });
+    } else return renderError({'message':"User passwords did not match!"}, response);
+  } catch (e) {
+    console.log(e.message);
+    signupGet(request, response);
+  }
 };
 
 var loginPost = function(request, response) {
@@ -212,7 +264,7 @@ var loginPost = function(request, response) {
     var userPass = request.body['login']['pass'];
     var originURL = request.body['login']['url'];
     
-    userController.get(userEmail, function(err, user) {
+    userController.getByEmail(userEmail, function(err, user) {
         if(err) return renderError(err, response);
         else {
             if(user && user['password']) {
@@ -287,10 +339,12 @@ exports.signupGet = signupGet;
 exports.signupPost = signupPost;
 exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
+exports.activateGet = activateGet;
 exports.addComment = addComment;
 exports.profileGet = profileGet;
 exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
+
 
 exports.setDataMux = setDataMux;
 //exports.setRedisClient = setRedisClient;

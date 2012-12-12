@@ -72,6 +72,7 @@ app.configure('production', function(){
 // Routes
 app.get('/logout', routes.logoutGet);
 app.get('/signup', routes.signupGet);
+app.get('/activate', routes.activateGet);
 app.post('/login', routes.loginPost);
 app.post('/signup', routes.signupPost);
 
