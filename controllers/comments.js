@@ -15,13 +15,19 @@ var get = function(userScriptId, site, userId, callback) {
 
 var save = function(commentData, callback) {
   commentDB.save(commentData, stdlib.errorClosure(callback, function(commentResult) {
-    return callback(null, commentData);
+    return callback(null, commentResult);
   }));
 };
 
 var remove = function(commentData, callback) {
   commentDB.remove(commentData, stdlib.errorClosure(callback, function(commentResult) {
-      return callback(null, commentData);
+      return callback(null, commentResult);
+  }));
+};
+
+var removeById = function(commentId, callback) {
+  commentDB.remove(commentId, stdlib.errorClosure(callback, function(commentResult) {
+      return callback(null, commentResult);
   }));
 };
 
@@ -29,3 +35,4 @@ exports.setDBMux = setDBMux;
 exports.get = get;
 exports.save = save;
 exports.remove = remove;
+exports.removeById = removeById;

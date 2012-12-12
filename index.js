@@ -153,17 +153,18 @@ var addComment = function(request, response) {
 
 var removeComment = function(request, response) {
   //app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
-  console.log("processing params:"+JSON.stringify(request.params));
-  console.log("processing query:"+JSON.stringify(request.query));
-  var theComment = {
-      'userScriptId' : request.param('userScriptId'),
-      site : request.param('website'),
-      articleId : request.param('articleId'),
-      siteUserId : request.param('userId'),
-      siteUsername : request.param('username'),
-      commentId : request.param('commentId'),
-  };
-  commentController.remove(theComment, function(err, result) {
+//  console.log("processing params:"+JSON.stringify(request.params));
+//  console.log("processing query:"+JSON.stringify(request.query));
+//  var theComment = {
+//      'userScriptId' : request.param('userScriptId'),
+//      site : request.param('website'),
+//      articleId : request.param('articleId'),
+//      siteUserId : request.param('userId'),
+//      siteUsername : request.param('username'),
+//      commentId : request.param('commentId'),
+//  };
+  var commentId = request.param('id');
+  commentController.removeById(commentId, function(err, result) {
     if(err) return renderError(err, response);
     response.writeHead(200, {'Content-Type': 'text/plain'});
       response.write("Comment removed.");

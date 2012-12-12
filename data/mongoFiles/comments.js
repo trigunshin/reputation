@@ -1,4 +1,5 @@
 var COLL = "comments", DB="reputation";
+var ObjectID = require('mongodb').ObjectID;
 var getCollection = null;
 var stdlib;
 var redisClient;
@@ -47,9 +48,18 @@ var remove = function(comment, callback) {
   }));
 };
 
+var removeById = function(commentId, callback) {
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+    collection.remove({_id: new ObjectID(commentId)}, stdlib.errorClosure(callback, function(result) {
+      callback(null, result);
+    }));
+  }));
+};
+
 exports.setCollectionAccessor = setCollectionAccessor;
 exports.get = get;
 exports.save = save;
 exports.remove = remove;
+exports.removeById = removeById;
 exports.setStdlib = setStdlib;
 exports.setRedis = setRedis;
