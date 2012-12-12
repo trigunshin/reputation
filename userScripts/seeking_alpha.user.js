@@ -78,9 +78,7 @@ function getDeleteLink(userCommentObj) {
     + delUrl
     +"\")'>";
   ret = ret + "Delete</a>";
-console.log("delete div w/url:"+delUrl);
-console.log("delete div html:"+ret);
-  return ret;
+  return ret;//TODO onClick, remove this particular element
 };
 function userReputationDataCallback(responseArray) {
   if(!responseArray || !responseArray.length) return false;
