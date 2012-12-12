@@ -146,6 +146,7 @@ function insertHTML(aCommentNode, commentProperties) {
   aCommentNode.insert({after:getFormHTML(commentProperties)});
 }
 
+var commonClassName = "rep_visited_class";
 var afterDomInsert = function(cb) {
   return function() {
     var curDomain = document.domain.split('.')[0];
@@ -167,6 +168,7 @@ var afterDomInsert = function(cb) {
         };
 
         insertHTML(elements[i].parentNode.firstElementChild, commentProperties);//technically this could run >1 times...
+        elements[i].addClassName(commonClassName);
       });
     }
     cb();
