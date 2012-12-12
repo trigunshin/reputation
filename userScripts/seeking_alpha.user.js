@@ -60,9 +60,27 @@ function sendUserReputationData(url, userCommentText) {
   });
   return false;
 };
+function deleteUserReputationData(url) {
+  sendRequest(url, 'DELETE', {}, function(err, transport) {
+    if(err) {console.log("error sending data...");return;}
+  });
+  return false;
+};
 function getUserReputationData(url, site, scriptId, userId) {
   insertScript(url);
   return false;
+};
+function getDeleteLink(userCommentObj) {
+  var ret = "<a href='#' ";
+  var delUrl = getSendDataURLOnPage(userCommentObj, "/remove");
+  
+  ret = ret + "onClick='return deleteUserReputationData(\""
+    + delUrl
+    +"\")'>";
+  ret = ret + "Delete</a>";
+console.log("delete div w/url:"+delUrl);
+console.log("delete div html:"+ret);
+  return ret;
 };
 function userReputationDataCallback(responseArray) {
   if(!responseArray || !responseArray.length) return false;
@@ -78,28 +96,45 @@ function userReputationDataCallback(responseArray) {
     for(var i=0,iLen=responseArray.length;i<iLen;i++) {
       var tmp = "<div class='comments_about_user_id_"
         + responseArray[i].siteUserId
-        + "'>"+responseArray[i].userCommentText+"</div>";
+        + "'>"+responseArray[i].userCommentText
+        + "'  '" + getDeleteLink(responseArray[i])
+        +"</div>";
       commentDivs[j].insert({bottom:tmp});
     }
     commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+localSiteUserId+"'>"});
   }
   
 };
-
+function getSendDataURLOnPage(commentProperties, methodAction) {
+  var restAction = methodAction || "/add";
+  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+    commentProperties.userScriptId,"/",
+    commentProperties.site,"/",
+    commentProperties.articleId,"/",
+    commentProperties.siteUsername,"/",
+    commentProperties.siteUserId,"/",
+    commentProperties.commentId,restAction
+  );
+}
+//load functions onto page for use in DOM
 insertScriptText(insertScript.toString());
 insertScriptText(sendRequest.toString());
 insertScriptText(sendUserReputationData.toString());
+insertScriptText(getDeleteLink.toString());
+insertScriptText(deleteUserReputationData.toString());
 insertScriptText(getUserReputationData.toString());
 insertScriptText(userReputationDataCallback.toString());
+insertScriptText(getSendDataURLOnPage.toString());
 
-function getSendDataURL(commentProperties) {
+function getSendDataURL(commentProperties, methodAction) {
+  var restAction = methodAction || "/add";
   return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
   userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
     commentProperties.userName,"/",
     commentProperties.userId,"/",
-    commentProperties.commentId,"/add"
+    commentProperties.commentId,restAction
   );
 }
 function getGetDataURL(commentProperties) {
