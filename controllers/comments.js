@@ -14,12 +14,18 @@ var get = function(userScriptId, site, userId, callback) {
 };
 
 var save = function(commentData, callback) {
-    commentDB.save(commentData, stdlib.errorClosure(callback, function(commentResult) {
-        return callback(null, commentData);
-    }));
+  commentDB.save(commentData, stdlib.errorClosure(callback, function(commentResult) {
+    return callback(null, commentData);
+  }));
 };
 
+var remove = function(commentData, callback) {
+  commentDB.remove(commentData, stdlib.errorClosure(callback, function(commentResult) {
+      return callback(null, commentData);
+  }));
+};
 
 exports.setDBMux = setDBMux;
 exports.get = get;
 exports.save = save;
+exports.remove = remove;

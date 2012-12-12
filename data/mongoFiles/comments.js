@@ -32,15 +32,24 @@ var get = function(userScriptId, site, userId, callback) {
 };
 
 var save = function(comment, callback) {
-    getCollection(stdlib.errorClosure(callback, function(collection) {
-        collection.insert(comment, stdlib.errorClosure(callback, function(result) {
-            callback(null, result);
-        }));
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+      collection.insert(comment, stdlib.errorClosure(callback, function(result) {
+          callback(null, result);
+      }));
+  }));
+};
+
+var remove = function(comment, callback) {
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+    collection.remove(comment, stdlib.errorClosure(callback, function(result) {
+      callback(null, result);
     }));
+  }));
 };
 
 exports.setCollectionAccessor = setCollectionAccessor;
-exports.save = save;
 exports.get = get;
+exports.save = save;
+exports.remove = remove;
 exports.setStdlib = setStdlib;
 exports.setRedis = setRedis;

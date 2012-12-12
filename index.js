@@ -121,34 +121,54 @@ var userCommentGet = function(request, response) {
 };
 
 var addComment = function(request, response) {
-	//app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
-	console.log("processing params:"+JSON.stringify(request.params));
-	console.log("processing query:"+JSON.stringify(request.query));
-	/*
-	var userScriptId = request.param('userScriptId');
-	var site = request.param('website');
-	var articleId = request.param('articleId');
-	var siteUserId = request.param('userId');
-	var siteUsername = request.param('username');
-	var commentId = request.param('commentId');
-	var commentText = request.query.comment || "none";
-	*/
-	var theComment = {
-			'userScriptId' : request.param('userScriptId'),
-			site : request.param('website'),
-			articleId : request.param('articleId'),
-			siteUserId : request.param('userId'),
-			siteUsername : request.param('username'),
-			commentId : request.param('commentId'),
-			createdOn : new Date(),
-			userCommentText : request.query.comment || "none"
-	};
-	commentController.save(theComment, function(err, result) {
-		if(err) return renderError(err, response);
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-	    response.write("Comment saved.");
-	    response.end();
-	});
+  //app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+  console.log("processing params:"+JSON.stringify(request.params));
+  console.log("processing query:"+JSON.stringify(request.query));
+  /*
+  var userScriptId = request.param('userScriptId');
+  var site = request.param('website');
+  var articleId = request.param('articleId');
+  var siteUserId = request.param('userId');
+  var siteUsername = request.param('username');
+  var commentId = request.param('commentId');
+  var commentText = request.query.comment || "none";
+  */
+  var theComment = {
+      'userScriptId' : request.param('userScriptId'),
+      site : request.param('website'),
+      articleId : request.param('articleId'),
+      siteUserId : request.param('userId'),
+      siteUsername : request.param('username'),
+      commentId : request.param('commentId'),
+      createdOn : new Date(),
+      userCommentText : request.query.comment || "none"
+  };
+  commentController.save(theComment, function(err, result) {
+    if(err) return renderError(err, response);
+    response.writeHead(200, {'Content-Type': 'text/plain'});
+      response.write("Comment saved.");
+      response.end();
+  });
+};
+
+var removeComment = function(request, response) {
+  //app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
+  console.log("processing params:"+JSON.stringify(request.params));
+  console.log("processing query:"+JSON.stringify(request.query));
+  var theComment = {
+      'userScriptId' : request.param('userScriptId'),
+      site : request.param('website'),
+      articleId : request.param('articleId'),
+      siteUserId : request.param('userId'),
+      siteUsername : request.param('username'),
+      commentId : request.param('commentId'),
+  };
+  commentController.remove(theComment, function(err, result) {
+    if(err) return renderError(err, response);
+    response.writeHead(200, {'Content-Type': 'text/plain'});
+      response.write("Comment removed.");
+      response.end();
+  });
 };
 
 /*Misc*/
@@ -342,6 +362,7 @@ exports.logoutGet = logoutGet;
 exports.loginPost = loginPost;
 exports.activateGet = activateGet;
 exports.addComment = addComment;
+exports.removeComment = removeComment;
 exports.profileGet = profileGet;
 exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;

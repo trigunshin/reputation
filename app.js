@@ -77,6 +77,7 @@ app.post('/login', routes.loginPost);
 app.post('/signup', routes.signupPost);
 
 app.get('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentId/add', routes.addComment);
+app['delete']('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentId/remove', routes.removeComment);
 app.get('/userComments/:userScriptId/:website/:userId/get', routes.userCommentGet);
 
 app.get('/getUserFile/:site/get', routes.getUserGreasemonkeyScript);
