@@ -25,7 +25,7 @@ function insertScriptText(scriptText) {
   var script = document.createTextNode(scriptText);
   script_tag.appendChild(script);
   
-  document.getElementsByTagName('head')[0].appendChild(script_tag);	
+  document.getElementsByTagName('head')[0].appendChild(script_tag); 
 }
 
 function sendRequest(requestURL, requestType, params, cb) {
@@ -94,7 +94,7 @@ insertScriptText(userReputationDataCallback.toString());
 
 function getSendDataURL(commentProperties) {
   return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
-	userScriptId,"/",
+  userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
     commentProperties.userName,"/",
@@ -147,18 +147,18 @@ function insertHTML(aCommentNode, commentProperties) {
 }
 
 var commonClassName = "rep_visited_class";
+var commentSelector = "div.com_info:not(."+commonClassName+")";
 var afterDomInsert = function(cb) {
   return function() {
     var curDomain = document.domain.split('.')[0];
     var articleId = window.location.href.match(/[\d]+/);
-    var elements = $$("div.com_info");
+    var elements = $$(commentSelector);
     for(var i=0,iLen=elements.length;i<iLen;i++) {
       elements[i].select("a.commenter_name").each(function(node) {
         var userName = node.readAttribute('fullname');
         var match = node.readAttribute('onmouseover').match(/[\d]+/g);
         var userId = match[0];
         var commentId = match[1];
-        var commentText="test";
         var commentProperties = {
           curDomain:curDomain,
           articleId:articleId,
@@ -171,7 +171,7 @@ var afterDomInsert = function(cb) {
         elements[i].addClassName(commonClassName);
       });
     }
-    cb();
+    if(cb) cb();
   };
 };
 var injectComments = function(forceAll, onComplete) {
@@ -184,14 +184,18 @@ self.get_real_comments = self.get_ajax_comments;
 self.get_ajax_comments = injectComments;
 
 var injectActions = function() {
-//  log("calling add_comment_actions");
   self.inj_comment_actions();
-//updatePage(forceAll=true)
-//continue_loading_comments();
   self.continue_loading_comments();
 };
 self.inj_comment_actions = self.add_comment_actions;
 self.add_comment_actions = injectActions;
 
-document.observe('dom:loaded', function() {
-});
+
+self.getComComplete = SA.Pages.Article.getCommentsComplete;
+var injectComComplete = function(response) {
+  self.getComComplete(response);
+  afterDomInsert()();
+};
+SA.Pages.Article.getCommentsComplete = injectComComplete;
+
+document.observe('dom:loaded', function() {;});
