@@ -25,7 +25,7 @@ function insertScriptText(scriptText) {
   var script = document.createTextNode(scriptText);
   script_tag.appendChild(script);
   
-  document.getElementsByTagName('head')[0].appendChild(script_tag);	
+  document.getElementsByTagName('head')[0].appendChild(script_tag); 
 }
 
 function sendRequest(requestURL, requestType, params, cb) {
@@ -44,7 +44,7 @@ function sendRequest(requestURL, requestType, params, cb) {
       });
     },
     onSuccess: function(response) {
-      console.log("success:"+JSON.stringify(response));
+      console.log("success:"+response);
       if(cb) cb(null, response);
     },
     onFailure: function(response) {
@@ -54,15 +54,36 @@ function sendRequest(requestURL, requestType, params, cb) {
   });
   return false;
 }
-function sendUserReputationData(url, userCommentText) {
+function sendUserReputationData(url, userCommentText, siteUserId) {
   sendRequest(url, 'get', {comment:userCommentText}, function(err, transport) {
     if(err) {console.log("error sending data...");return;}
+    $$("a.getFor_"+siteUserId)[0].click();
+  });
+  return false;
+};
+function deleteUserReputationData(url, params) {
+  sendRequest(url, 'DELETE', params, function(err, transport) {
+    if(err) {return console.log("error sending data...");}
+    $$("div."+params.id).each(function(item) {
+      item.remove();
+    });
   });
   return false;
 };
 function getUserReputationData(url, site, scriptId, userId) {
   insertScript(url);
   return false;
+};
+function getDeleteLink(userCommentObj) {
+  var ret = "<a href='#' ";
+  ret = ret + "class='"+userCommentObj['_id']+"' ";
+  var delUrl = getSendDataURLOnPage(userCommentObj, "/remove");
+  var params = {id:userCommentObj['_id']};
+  ret = ret + "onClick='return deleteUserReputationData(\""
+    + delUrl
+    +"\", "+JSON.stringify(params)+")'>";
+  ret = ret + "Delete</a>";
+  return ret;
 };
 function userReputationDataCallback(responseArray) {
   if(!responseArray || !responseArray.length) return false;
@@ -76,30 +97,48 @@ function userReputationDataCallback(responseArray) {
   var commentDivs = $$(".userId_"+localSiteUserId);
   for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
     for(var i=0,iLen=responseArray.length;i<iLen;i++) {
-      var tmp = "<div class='comments_about_user_id_"
+      var tmp = "<div class='comments_about_user_id_" 
         + responseArray[i].siteUserId
-        + "'>"+responseArray[i].userCommentText+"</div>";
+        + " " + responseArray[i]['_id'] + "'>"
+        + getDeleteLink(responseArray[i]) + ": "
+        + responseArray[i].userCommentText
+        + "</div>";
       commentDivs[j].insert({bottom:tmp});
     }
     commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+localSiteUserId+"'>"});
   }
   
 };
-
+function getSendDataURLOnPage(commentProperties, methodAction) {
+  var restAction = methodAction || "/add";
+  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+    commentProperties.userScriptId,"/",
+    commentProperties.site,"/",
+    commentProperties.articleId,"/",
+    commentProperties.siteUsername,"/",
+    commentProperties.siteUserId,"/",
+    commentProperties.commentId,restAction
+  );
+}
+//load functions onto page for use in DOM
 insertScriptText(insertScript.toString());
 insertScriptText(sendRequest.toString());
 insertScriptText(sendUserReputationData.toString());
+insertScriptText(getDeleteLink.toString());
+insertScriptText(deleteUserReputationData.toString());
 insertScriptText(getUserReputationData.toString());
 insertScriptText(userReputationDataCallback.toString());
+insertScriptText(getSendDataURLOnPage.toString());
 
-function getSendDataURL(commentProperties) {
+function getSendDataURL(commentProperties, methodAction) {
+  var restAction = methodAction || "/add";
   return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
-	userScriptId,"/",
+  userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
     commentProperties.userName,"/",
     commentProperties.userId,"/",
-    commentProperties.commentId,"/add"
+    commentProperties.commentId,restAction
   );
 }
 function getGetDataURL(commentProperties) {
@@ -111,17 +150,18 @@ function getGetDataURL(commentProperties) {
 }
 function getFormHTMLPrefix(commentProperties) {
   return "<div id='user_rep_tracker_div' class='userId_"+commentProperties.userId+"'>"
-    +"<form name='input' method='get' onsubmit='return sendUserReputationData(\""
-    +getSendDataURL(commentProperties)
-    +"\", "
-    +"this.userComment.value"
-    +");' class='commentSubmitForms'>";
+    + "<form name='input' method='get' onsubmit='return sendUserReputationData(\""
+    + getSendDataURL(commentProperties) + "\", "
+    + "this.userComment.value" + ", \""
+    + commentProperties.userId + "\");' "
+    + "class='commentSubmitForms'>";
     
 };
 function getFormHTMLSuffix(commentProperties) {
   return "<input type='text' name='userComment'>"
     +"<input type='submit' value='Submit'>"
-    +"<br><a href='#' onClick='return getUserReputationData(\""
+    +"<br><a href='#' class='getFor_"+commentProperties.userId+"' "
+    +"onClick='return getUserReputationData(\""
     +getGetDataURL(commentProperties)
     +"\",\""+commentProperties.curDomain
     +"\",\""+userScriptId
@@ -133,8 +173,6 @@ function getFormHTMLSuffix(commentProperties) {
 function getFormHTML(commentProperties) {
   var sendDataURL = getSendDataURL(commentProperties);
   var getDataURL = getGetDataURL(commentProperties);
-//console.log("sendDataURL:"+sendDataURL);
-//console.log("getDataURL:"+getDataURL);
   var inputs = "".concat("<input type='hidden' name='site' value='"+ commentProperties.curDomain+"' />"
   , "<input type='hidden' name='articleId' value='"+ commentProperties.articleId+"' />"
   , "<input type='hidden' name='userId' value='"+ commentProperties.userId+"' />"
