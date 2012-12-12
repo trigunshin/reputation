@@ -3,8 +3,12 @@ if(!session.auth)
   br
   .text Login first please
 else
-  .text Your script id is: #{scriptId}
+  a(href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/") Greasemonkey FireFox Addon page
   br
+  a(href="http://userscripts.org/about/installing") Greasemonkey Installation Guide from Userscripts.org
+  hr
+  .text Your script id is: #{scriptId}
+  hr
   -for site in sites
     h2 #{site}
     a(href="/getUserFile/#{site}/#{site}.user.js") Install #{site} Greasemonkey script.

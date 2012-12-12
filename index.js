@@ -82,7 +82,7 @@ function readDataForSite(aSite) {
 /* Route Handlers */
 var index = function(request, response) {
     response.render(__dirname+"/views/index", {
-        title:"So it begins."
+        title:"User Reputation Tracker"
     });
 };
 
