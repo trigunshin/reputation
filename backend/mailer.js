@@ -1,5 +1,6 @@
 var email = require("emailjs");
-var emailConfig = require("./conf/app_conf").emailConfig;
+var nodemailer = require("nodemailer");
+var emailConfig = require("../conf/app_conf").emailConfig;
 var server = email.server.connect(emailConfig);
 var crypto = require("crypto"),
     querystring = require("querystring");
@@ -12,37 +13,60 @@ var decodeToken = function(token) {
   return querystring.parse(token, ';',':');
 };
 
-var userEmailToken = "#{name}";
-var signupText = "Thanks for signing up, " +
-  userEmailToken +
-  ".\nThe following link will activate you:"+
-  "reputation.herokuapp.com/activate?token=";
-var signupFrom = "you <" + emailConfig.user + ">";
 var signupSubject = "Reputation Signup Confirmation";
-var userSignup = function(userEmail, cb) {
-  console.log("mailer saw signup for:"+userEmail);
-  crypto.randomBytes(24, function (err, bytes) {
-	var activateCode = encodeURIComponent(bytes.toString('base64'));
-    server.send({
-        text:signupText.replace(userEmailToken, userEmail) + activateCode,
-        from: "you <"+emailConfig.user+">",
-        to: userEmail+" <" + userEmail +">",
-        subject: signupSubject,
-        attachment: [
-          {data:"<html>i <i>hope</i> this works! <hr><a href='reputation.herokuapp.com/activate?token="+
-        	  activateCode+
-        	  "'>Activate</a></html>",
-           alternative:true}
-        ]
-      },
-      function(err, message) {
-        if(err) cb(err);
-        console.log("Signup confirmation sent for:"+userEmail);
-        if(cb) cb(null, message);
+
+var path = require('path'),
+    templatesDir = path.join(__dirname, 'templates');
+var emailTemplates = require("email-templates");
+
+var userSignup = function(msgObject, cb) {
+  console.log("mailer saw signup object:"+JSON.stringify(msgObject));
+  crypto.randomBytes(48, function (err, bytes) {
+    var activateCode = bytes.toString('hex');
+    emailTemplates(templatesDir, function(err, template) {
+      if (err) {
+        console.log(err);
+      } else {
+        var transport = nodemailer.createTransport("SMTP", {
+          service: "Gmail",
+          auth: {
+            user: emailConfig.user,
+            pass: emailConfig.password
+          }
+        });
+        var locals = {
+          email: msgObject.email,
+          name: {
+            first: 't',
+            last: 'c'
+          },
+          subject: signupSubject,
+          activationCode:msgObject.activationCode
+        };
+        template('signup', locals, function(err, html, text) {
+          if (err) {
+            console.log(err);
+          } else {
+            transport.sendMail({
+              from: emailConfig.userNameString,
+              to: locals.email,
+              subject: locals.subject,
+              html: html,
+              generateTextFromHTML: true,
+//              text: text
+            }, function(err, responseStatus) {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(responseStatus.message);
+                if(cb) cb(err, responseStatus.message);
+              }
+            });
+          }
+        });
       }
-    );
+    });
   });
-  
 };
 
 var userWelcome = function() {
