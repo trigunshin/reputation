@@ -26,7 +26,7 @@ var remove = function(commentData, callback) {
 };
 
 var removeById = function(commentId, callback) {
-  commentDB.remove(commentId, stdlib.errorClosure(callback, function(commentResult) {
+  commentDB.removeById(commentId, stdlib.errorClosure(callback, function(commentResult) {
       return callback(null, commentResult);
   }));
 };
