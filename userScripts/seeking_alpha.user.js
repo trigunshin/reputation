@@ -48,21 +48,25 @@ function sendRequest(requestURL, requestType, params, cb) {
       if(cb) cb(null, response);
     },
     onFailure: function(response) {
-      console.log("failed:"+response);
+      console.log("failed:"+JSON.stringify(response));
       if(cb) cb(response);
     }
   });
   return false;
 }
-function sendUserReputationData(url, userCommentText) {
+function sendUserReputationData(url, userCommentText, siteUserId) {
   sendRequest(url, 'get', {comment:userCommentText}, function(err, transport) {
     if(err) {console.log("error sending data...");return;}
+    $$("a.getFor_"+siteUserId)[0].click();
   });
   return false;
 };
 function deleteUserReputationData(url, params) {
   sendRequest(url, 'DELETE', params, function(err, transport) {
-    if(err) {console.log("error sending data...");return;}
+    if(err) {return console.log("error sending data...");}
+    $$("div."+params.id).each(function(item) {
+      item.remove();
+    });
   });
   return false;
 };
@@ -72,14 +76,14 @@ function getUserReputationData(url, site, scriptId, userId) {
 };
 function getDeleteLink(userCommentObj) {
   var ret = "<a href='#' ";
-  ret = ret + "id='"+userCommentObj['_id']+"' ";
+  ret = ret + "class='"+userCommentObj['_id']+"' ";
   var delUrl = getSendDataURLOnPage(userCommentObj, "/remove");
   var params = {id:userCommentObj['_id']};
   ret = ret + "onClick='return deleteUserReputationData(\""
     + delUrl
-    +"\", "+params+")'>";
+    +"\", "+JSON.stringify(params)+")'>";
   ret = ret + "Delete</a>";
-  return ret;//TODO onClick, remove this particular element
+  return ret;
 };
 function userReputationDataCallback(responseArray) {
   if(!responseArray || !responseArray.length) return false;
@@ -93,13 +97,12 @@ function userReputationDataCallback(responseArray) {
   var commentDivs = $$(".userId_"+localSiteUserId);
   for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
     for(var i=0,iLen=responseArray.length;i<iLen;i++) {
-      var tmp = "<div class='comments_about_user_id_"
+      var tmp = "<div class='comments_about_user_id_" 
         + responseArray[i].siteUserId
-        + "'>"
-        + getDeleteLink(responseArray[i])
-        + ": "
-        +responseArray[i].userCommentText
-        +"</div>";
+        + " " + responseArray[i]['_id'] + "'>"
+        + getDeleteLink(responseArray[i]) + ": "
+        + responseArray[i].userCommentText
+        + "</div>";
       commentDivs[j].insert({bottom:tmp});
     }
     commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+localSiteUserId+"'>"});
@@ -147,17 +150,18 @@ function getGetDataURL(commentProperties) {
 }
 function getFormHTMLPrefix(commentProperties) {
   return "<div id='user_rep_tracker_div' class='userId_"+commentProperties.userId+"'>"
-    +"<form name='input' method='get' onsubmit='return sendUserReputationData(\""
-    +getSendDataURL(commentProperties)
-    +"\", "
-    +"this.userComment.value"
-    +");' class='commentSubmitForms'>";
+    + "<form name='input' method='get' onsubmit='return sendUserReputationData(\""
+    + getSendDataURL(commentProperties) + "\", "
+    + "this.userComment.value" + ", \""
+    + commentProperties.userId + "\");' "
+    + "class='commentSubmitForms'>";
     
 };
 function getFormHTMLSuffix(commentProperties) {
   return "<input type='text' name='userComment'>"
     +"<input type='submit' value='Submit'>"
-    +"<br><a href='#' onClick='return getUserReputationData(\""
+    +"<br><a href='#' class='getFor_"+commentProperties.userId+"' "
+    +"onClick='return getUserReputationData(\""
     +getGetDataURL(commentProperties)
     +"\",\""+commentProperties.curDomain
     +"\",\""+userScriptId
