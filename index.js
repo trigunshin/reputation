@@ -132,7 +132,7 @@ var getCommentGroup = function(request, response) {
   commentController.getCommentGroup(userScriptId, site, idList, function(err, result) {
     if(err) return renderError(err, response);
     console.log("returning comment group of size:"+result.length);
-    response.json(result);
+    response.json({'data':result});
   });
 };
 
