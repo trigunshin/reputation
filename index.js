@@ -130,7 +130,7 @@ var getCommentGroup = function(request, response) {
   var idList = request.param('idList');
   //*/
   commentController.getCommentGroup(userScriptId, site, idList, function(err, result) {
-    if(err) return renderError(err, response);
+    if(err) {console.log("err on batchget...");return response.json({'err':err});}
     console.log("returning comment group of size:"+result.length);
     response.json({'data':result});
   });
