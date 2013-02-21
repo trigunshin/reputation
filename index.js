@@ -120,6 +120,22 @@ var userCommentGet = function(request, response) {
 	});
 };
 
+var getCommentGroup = function(request, response) {
+  //app.get('/userData/:userId/:website/get?idList=test', routes.addComment);
+  console.log("processing params:"+JSON.stringify(request.params));
+  console.log("processing query:"+JSON.stringify(request.query));
+  //*
+  var userScriptId = request.param('userScriptId');
+  var site = request.param('website');
+  var idList = request.param('idList');
+  //*/
+  commentController.getCommentGroup(userScriptId, site, idList, function(err, result) {
+    if(err) return renderError(err, response);
+    console.log("returning comment group of size:"+result.length);
+    response.json(result);
+  });
+};
+
 var addComment = function(request, response) {
   //app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
   console.log("processing params:"+JSON.stringify(request.params));
@@ -356,7 +372,7 @@ exports.removeComment = removeComment;
 exports.profileGet = profileGet;
 exports.userCommentGet = userCommentGet;
 exports.getUserGreasemonkeyScript = getUserGreasemonkeyScript;
-
+exports.getCommentGroup = getCommentGroup;
 
 exports.setDataMux = setDataMux;
 //exports.setRedisClient = setRedisClient;

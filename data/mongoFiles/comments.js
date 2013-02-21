@@ -16,20 +16,54 @@ function setCollectionAccessor(getColl) {
     getCollection = getColl(COLL, DB);
 };
 
-var get = function(userScriptId, site, userId, callback) {
-    getCollection(stdlib.errorClosure(callback, function(collection) {
-    	var query = {userScriptId:userScriptId,
-    	    site:site,
-    	    siteUserId:userId
-	    };
-		var sort = [["createdOn",-1]];
-        var opts = {"limit":5, "sort":sort};
-        collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
-        	results.toArray(stdlib.errorClosure(callback, function(items) {
-                callback(null, items);
-        	}));
-        }));
+var getInSet = function(userScriptId, site, userIdList, callback) {
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+    var query = {
+        userScriptId:userScriptId,
+        site:site,
+        siteUserId:{'$in':userId}
+    };
+    var sort = [["createdOn",-1]];
+    var opts = {"limit":5, "sort":sort};
+    collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
+      results.toArray(stdlib.errorClosure(callback, function(items) {
+        callback(null, items);
+      }));
     }));
+  }));
+};
+
+var get = function(userScriptId, site, userId, callback) {
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+  	var query = {userScriptId:userScriptId,
+  	    site:site,
+  	    siteUserId:userId
+    };
+  	var sort = [["createdOn",-1]];
+    var opts = {"limit":5, "sort":sort};
+    collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
+    	results.toArray(stdlib.errorClosure(callback, function(items) {
+        callback(null, items);
+    	}));
+    }));
+  }));
+};
+
+
+var getCommentGroup = function(userScriptId, site, userIdArray, callback) {
+  getCollection(stdlib.errorClosure(callback, function(collection) {
+    var query = {userScriptId:userScriptId,
+        site:site,
+        siteUserId:{'$in':userIdArray}
+    };
+    var sort = [["createdOn",-1]];
+    var opts = {"sort":sort};
+    collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
+      results.toArray(stdlib.errorClosure(callback, function(items) {
+        callback(null, items);
+      }));
+    }));
+  }));
 };
 
 var save = function(comment, callback) {
@@ -58,6 +92,7 @@ var removeById = function(commentId, callback) {
 
 exports.setCollectionAccessor = setCollectionAccessor;
 exports.get = get;
+exports.getCommentGroup = getCommentGroup;
 exports.save = save;
 exports.remove = remove;
 exports.removeById = removeById;

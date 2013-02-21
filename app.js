@@ -80,6 +80,8 @@ app.get('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentI
 app['delete']('/userData/:userScriptId/:website/:articleId/:username/:userId/:commentId/remove', routes.removeComment);
 app.get('/userComments/:userScriptId/:website/:userId/get', routes.userCommentGet);
 
+app.get('/userComments/:userScriptId/:website/get',routes.getCommentGroup);
+
 app.get('/getUserFile/:site/get', routes.getUserGreasemonkeyScript);
 app.get('/getUserFile/:site/*.user.js', routes.getUserGreasemonkeyScript);
 app.get('/profile', routes.profileGet);
