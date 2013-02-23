@@ -39,7 +39,7 @@ var getCommentGroup = function(userScriptId, site, userIdArray, callback) {
         site:site,
         siteUserId:{'$in':userIdArray}
     };
-    var sort = [["createdOn",-1]];
+    var sort = [["createdOn",-1],['siteUserId',-1]];
     var opts = {"sort":sort};
     collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
       results.toArray(stdlib.errorClosure(callback, function(items) {
