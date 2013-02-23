@@ -14,7 +14,7 @@ var get = function(userScriptId, site, userId, callback) {
 };
 
 var getCommentGroup = function(userScriptId, site, userIdArray, callback) {
-  commentDB.get(userScriptId, site, userIdArray, stdlib.errorClosure(callback, function(commentList) {
+  commentDB.getCommentGroup(userScriptId, site, userIdArray, stdlib.errorClosure(callback, function(commentList) {
     return callback(null, commentList);
   }));
 };

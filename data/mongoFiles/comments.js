@@ -16,23 +16,6 @@ function setCollectionAccessor(getColl) {
     getCollection = getColl(COLL, DB);
 };
 
-var getInSet = function(userScriptId, site, userIdList, callback) {
-  getCollection(stdlib.errorClosure(callback, function(collection) {
-    var query = {
-        userScriptId:userScriptId,
-        site:site,
-        siteUserId:{'$in':userId}
-    };
-    var sort = [["createdOn",-1]];
-    var opts = {"limit":5, "sort":sort};
-    collection.find(query, opts, stdlib.errorClosure(callback, function(results) {
-      results.toArray(stdlib.errorClosure(callback, function(items) {
-        callback(null, items);
-      }));
-    }));
-  }));
-};
-
 var get = function(userScriptId, site, userId, callback) {
   getCollection(stdlib.errorClosure(callback, function(collection) {
   	var query = {userScriptId:userScriptId,
