@@ -6,6 +6,7 @@
 // @version       1.0.0
 // ==/UserScript==
 var startTime = (new Date()).getTime();
+var baseURL = "http://reputation.herokuapp.com";
 function log(msg) {
   var milliseconds = (new Date()).getTime() - startTime;
   window.setTimeout(function () {
@@ -111,7 +112,7 @@ function userReputationDataCallback(responseArray) {
 };
 function getSendDataURLOnPage(commentProperties, methodAction) {
   var restAction = methodAction || "/add";
-  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+  return sendDataURL = baseURL+"/userData/".concat(
     commentProperties.userScriptId,"/",
     commentProperties.site,"/",
     commentProperties.articleId,"/",
@@ -120,7 +121,47 @@ function getSendDataURLOnPage(commentProperties, methodAction) {
     commentProperties.commentId,restAction
   );
 }
+function userBatchDataCallback(data) {
+  var responseArray = data.data;
+  var userCommentMap={},userIdList=[];
+  if(!responseArray || !responseArray.length) return false;
+  responseArray = [].concat(responseArray);
+  for(var i=0,iLen=responseArray.length;i<iLen;i++) {
+    //bucket by id
+    var cur = responseArray[i];
+    if(!userCommentMap[cur.siteUserId]) {
+      userIdList.push(cur.siteUserId);
+      userCommentMap[cur.siteUserId]=[cur];
+    } else userCommentMap[cur.siteUserId].push(cur);
+  }
+  //then for each id, do the removal/inserts
+  for(var i=0,iLen=userIdList.length;i<iLen;i++) {
+    var curId = userIdList[i];
+    //remove existing comments
+    var commentDivs = $$(".comments_about_user_id_"+curId);
+    for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
+      commentDivs[j].remove();
+    }
+    //append acquired comments
+    var commentDivs = $$(".userId_"+curId);
+    for(var j=0,jLen = commentDivs.length;j<jLen;j++) {
+      var curUserComments = userCommentMap[curId];
+      for(var z=0,zLen=curUserComments.length;z<zLen;z++) {
+        var tmp = "<div class='comments_about_user_id_" 
+          + curUserComments[z].siteUserId
+          + " " + curUserComments[z]['_id'] + "'>"
+          + getDeleteLink(curUserComments[z]) + ": "
+          + curUserComments[z].userCommentText
+          + "</div>";
+        commentDivs[j].insert({bottom:tmp});
+      }
+      commentDivs[j].insert({bottom:"<hr class='comments_about_user_id_"+curId+"'>"});
+    }
+  }
+};
 //load functions onto page for use in DOM
+insertScriptText("var baseURL ='"+baseURL+"';");
+insertScriptText(userBatchDataCallback.toString());
 insertScriptText(insertScript.toString());
 insertScriptText(sendRequest.toString());
 insertScriptText(sendUserReputationData.toString());
@@ -132,7 +173,7 @@ insertScriptText(getSendDataURLOnPage.toString());
 
 function getSendDataURL(commentProperties, methodAction) {
   var restAction = methodAction || "/add";
-  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+  return sendDataURL = baseURL+"/userData/".concat(
   userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
@@ -142,7 +183,7 @@ function getSendDataURL(commentProperties, methodAction) {
   );
 }
 function getGetDataURL(commentProperties) {
-  return "http://reputation.herokuapp.com/userComments/".concat(
+  return baseURL+"/userComments/".concat(
     userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.userId,"/get?callback= userReputationDataCallback"
@@ -185,9 +226,17 @@ function getFormHTML(commentProperties) {
 function insertHTML(aCommentNode, commentProperties) {
   aCommentNode.insert({after:getFormHTML(commentProperties)});
 }
-
+var doInitialLoad = function(url,idList) {
+  var submitURL = url;
+  log(idList);
+  for(var i=0,iLen=idList.length;i<iLen;i++) {
+    submitURL+="&idList="+idList[i];
+  }
+  insertScript(submitURL);
+};
 var commonClassName = "rep_visited_class";
 var commentSelector = "div.com_info:not(."+commonClassName+")";
+var idAggr={},idList=[];
 var afterDomInsert = function(cb) {
   return function() {
     var curDomain = document.domain.split('.')[0];
@@ -206,11 +255,16 @@ var afterDomInsert = function(cb) {
           userId:userId,
           commentId:commentId
         };
-
+        if(!idAggr[userId]) {
+          idAggr[userId]=1;
+          idList.push(userId);
+        }
         insertHTML(elements[i].parentNode.firstElementChild, commentProperties);//technically this could run >1 times...
         elements[i].addClassName(commonClassName);
       });
     }
+    console.log("idLen:"+idList.length);
+    doInitialLoad(baseURL+"/userComments/"+userScriptId+"/"+curDomain+"/get?callback=userBatchDataCallback",idList);
     if(cb) cb();
   };
 };
