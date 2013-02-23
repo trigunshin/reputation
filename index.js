@@ -127,7 +127,7 @@ var getCommentGroup = function(request, response) {
   //*
   var userScriptId = request.param('userScriptId');
   var site = request.param('website');
-  var idList = request.param('idList');
+  var idList = [].concat(request.param('idList'));
   //*/
   commentController.getCommentGroup(userScriptId, site, idList, function(err, result) {
     if(err) {console.log("err on batchget...");return response.json({'err':err});}
