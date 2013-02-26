@@ -1,3 +1,10 @@
+if(process.env.NODETIME_ACCOUNT_KEY) {
+  require('nodetime').profile({
+    accountKey: process.env.NODETIME_ACCOUNT_KEY,
+    appName: 'Reputation Webworker'
+  });
+}
+
 var fs = require('fs');
 var express = require('express'),
 	urlParsing = require('url'),
