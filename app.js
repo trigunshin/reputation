@@ -1,9 +1,7 @@
-if(process.env.NODETIME_ACCOUNT_KEY) {
-  require('nodetime').profile({
-    accountKey: process.env.NODETIME_ACCOUNT_KEY,
-    appName: 'Reputation Webworker'
-  });
-}
+require('nodefly').profile(
+    process.env.NODEFLY_APPLICATION_KEY,
+    ["reputation",'Heroku']
+);
 
 var fs = require('fs');
 var express = require('express'),

@@ -23,8 +23,6 @@
     , "nodemailer":"0.3.35"
     , "emailjs":"~0.3.3"
     , "email-templates":"0.0.7"
-    , "nodetime":"*"
-    , "timekit":"*"
-    , "v8tools":"*"
+    , "nodefly": "stable"
   }
 }
