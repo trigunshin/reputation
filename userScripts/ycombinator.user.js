@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          YCombinator User Tracker 
-// @include       http://news.ycombinator.com/item?id=*
+// @include       /^https?://news\.ycombinator\.com/item\?id=.*$/
 // @grant         none
 // @namespace     reputation.herokuapp.com
 // @version       1.0.0
