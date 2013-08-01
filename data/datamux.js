@@ -14,7 +14,9 @@ var getMongo = function(cb) {
 };
 
 var getRabbit = function(cb) {
-  return rabbit.get(config, cb);
+  // XXX this totally doesn't need wabbit
+  return {};
+  //return rabbit.get(config, cb);
 };
 
 exports.getRabbit = getRabbit;

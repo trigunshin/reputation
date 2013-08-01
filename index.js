@@ -6,7 +6,7 @@ var querystring = require("querystring"),
     url = require("url"),
     fs = require("fs"),
     crypto = require("crypto");
-
+var user_emailer = require("./backend/mailer");
 var userController = require("./controllers/users");
 var commentController = require("./controllers/comments");
 
@@ -201,13 +201,18 @@ var generateToken = function(cb) {
 
 var sendActivationEmail = function(userEmail, cb) {
   generateToken(function(err, activationCode) {
+    /*
     console.log("sending activation email w/topic:"+EMAIL_SIGNUP_STRING);
     sendMsg(EMAIL_SIGNUP_STRING, JSON.stringify({
         email:userEmail,
         activationCode:activationCode
       })
     );
-    cb(err, activationCode);
+    */
+    user_emailer.send_signup_email(userEmail, activationCode, function(err, response) {
+      if(err) console.log("error sending email:"+err);
+      cb(err, activationCode);
+    });
   });
 };
 
