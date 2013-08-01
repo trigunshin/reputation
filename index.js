@@ -7,6 +7,8 @@ var querystring = require("querystring"),
     fs = require("fs"),
     crypto = require("crypto");
 
+var user_mailer = require("./backend/mailer");
+
 var userController = require("./controllers/users");
 var commentController = require("./controllers/comments");
 
@@ -209,7 +211,7 @@ var sendActivationEmail = function(userEmail, cb) {
       })
     );
     */
-    send_signup_email(userEmail, activationCode, function(err, response) {
+    user_mailer.send_signup_email(userEmail, activationCode, function(err, response) {
       if(err) console.log("error sending email:"+err);
       cb(err, activationCode);
     });
