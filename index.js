@@ -244,39 +244,25 @@ var signupPost = function(request, response) {
         else userController.getByEmail(email, function(err, userResult) {
           if(err) return renderError(err, response);
           else if(userResult) {
-            console.log("result:"+JSON.stringify(userResult));
-            if(userResult.activationCode) {//resend the token
-              sendActivationEmail(email, function(err, token) {
-                if(err) return renderError(err, response);
-                userController.findAndUpdate(email, {"activationCode":token}, function(err) {
-                  if(err) return renderError(err, response);
-                  redirect(response, "Check your email for the activation link.", 'profile');
-                });
-              });
-            } else {//address already registered
-              return renderError({'message':"Email already exists. Please try another one or login."}, response);
-            }
+            // XXX used to handle un-confirmed users here
+            return renderError({'message':"Email already exists. Please try another one or login."}, response);
           } else {
-            generateToken(function (err, scriptCode) {
-              sendActivationEmail(email, function(err, activationCode) {
-                if(err) return renderError(err, response);
-          		  var userToSave = {
-          		      'email':email
-          			  , 'password':hash
-          			  , 'createdOn':new Date()
-          			  , 'scriptId':scriptCode
-          			  , 'activationCode':activationCode
-          		  };
-          		  userController.save(userToSave, function(err) {
-          			  if(err) return renderError(err, response);
-          			  else {
-//          				  request.session.name=email;
-//          				  request.session.user=userToSave;
-//          				  request.session.auth=true;
-          				  redirect(response, "Check your email for the activation link.", 'profile');
-          			  }
-          		  });
-          	  });
+            var userToSave = {
+                'email': email
+              , 'password': hash
+              , 'createdOn': new Date()
+              , 'scriptId': scriptCode
+              , 'activationCode': null
+            };
+            // XXX used to handle activation email sending here
+            userController.save(userToSave, function(err) {
+              if(err) return renderError(err, response);
+              else {
+                request.session.name=email;
+                request.session.user=userToSave;
+                request.session.auth=true;
+                redirect(response, "Thanks for signing up!", 'profile');
+              }
             });
           }
       	});
