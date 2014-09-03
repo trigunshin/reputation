@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+
+  "name": "Reputation",
+  "description": "Fetch, display and modify comments on users from HackerNews and Seeking Alpha.",
+  "version": "1.0",
+  "options_page": "options.html",
+  "homepage_url": "https://reputation.herokuapp.com",
+
+  "content_scripts": [{
+        "matches": ["*://news.ycombinator.com/*"],
+        "js": [
+          "prototype_1.7.1.0.js",
+          "lodash.min.js",
+          "chrome_yc.js"
+        ]
+  }],
+  "permissions": [
+    "storage",
+    "http://reputation.herokuapp.com/",
+    "https://reputation.herokuapp.com/"
+  ]
+}
