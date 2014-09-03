@@ -23,6 +23,5 @@
     , "nodemailer":"0.3.35"
     , "emailjs":"~0.3.3"
     , "email-templates":"0.0.7"
-    , "nodefly": "stable"
   }
 }

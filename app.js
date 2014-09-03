@@ -1,8 +1,3 @@
-require('nodefly').profile(
-    process.env.NODEFLY_APPLICATION_KEY,
-    ["reputation",'Heroku']
-);
-
 var fs = require('fs');
 var express = require('express'),
 	urlParsing = require('url'),
