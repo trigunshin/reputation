@@ -19,26 +19,6 @@ datamux.getRedis(function(redis) {
   redisClient = redis;
 });
 
-
-/* Set up websockets */
-var socket = require("socket.io");
-var io = socket.listen(app);
-io.configure(function () { 
-  io.set("transports", ["xhr-polling"]); 
-  io.set("polling duration", 10);
-  io.set("log level", 2);
-});
-io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-  socket.on('message',function(data,time,username) {
-    socket.broadcast.emit('message',data,time,username);
-    socket.emit('message',data,time,username,true);
-  });
-});
-
 // Configuration
 var logstring = ":remote-addr - [:date] \":method :url\" :status len\::res[content-length] 'ref :referrer' :response-time ms";
 var logStream = fs.createWriteStream('./log.log',{flags:'a'});
@@ -86,7 +66,6 @@ app.get('/getUserFile/:site/get', routes.getUserGreasemonkeyScript);
 app.get('/getUserFile/:site/*.user.js', routes.getUserGreasemonkeyScript);
 app.get('/profile', routes.profileGet);
 
-app.get('/sockets', routes.sockets);
 app.get('/', routes.index);
 
 var APP_PORT = process.env.PORT || 3000;
