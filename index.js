@@ -111,6 +111,8 @@ var getUserGreasemonkeyScript = function(request, response) {
 };
 
 var userCommentGet = function(request, response) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+
 	var userScriptId = request.param('userScriptId');
 	var site = request.param('website');
 	var siteUserId = request.param('userId');
@@ -121,6 +123,8 @@ var userCommentGet = function(request, response) {
 };
 
 var getCommentGroup = function(request, response) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+
   //app.get('/userData/:userId/:website/get?idList=test', routes.addComment);
   console.log("processing params:"+JSON.stringify(request.params));
   console.log("processing query:"+JSON.stringify(request.query));
@@ -137,6 +141,8 @@ var getCommentGroup = function(request, response) {
 };
 
 var addComment = function(request, response) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+
   //app.get('/userData/:userId/:website/:articleId/:username/:userId/:commentId/?comment=test', routes.addComment);
   console.log("processing params:"+JSON.stringify(request.params));
   console.log("processing query:"+JSON.stringify(request.query));
@@ -168,6 +174,8 @@ var addComment = function(request, response) {
 };
 
 var removeComment = function(request, response) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+
   var commentId = request.param('id');
   commentController.removeById(commentId, function(err, result) {
     if(err) return renderError(err, response);
