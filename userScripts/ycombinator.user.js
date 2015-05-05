@@ -6,7 +6,7 @@
 // @version       1.0.0
 // ==/UserScript==
 var startTime = (new Date()).getTime();
-var baseURL = "http://reputation.herokuapp.com";
+var baseURL = "https://reputation.herokuapp.com";
 function log(msg) {
   var milliseconds = (new Date()).getTime() - startTime;
   window.setTimeout(function () {
@@ -152,7 +152,7 @@ function userReputationDataCallback(responseArray) {
 };
 function getSendDataURLOnPage(commentProperties, methodAction) {
   var restAction = methodAction || "/add";
-  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+  return sendDataURL = "https://reputation.herokuapp.com/userData/".concat(
     commentProperties.userScriptId,"/",
     commentProperties.site,"/",
     commentProperties.articleId,"/",
@@ -176,7 +176,7 @@ insertScriptText(userBatchDataCallback.toString());
 
 function getSendDataURL(commentProperties, methodAction) {
   var restAction = methodAction || "/add";
-  return sendDataURL = "http://reputation.herokuapp.com/userData/".concat(
+  return sendDataURL = "https://reputation.herokuapp.com/userData/".concat(
   userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.articleId,"/",
@@ -186,7 +186,7 @@ function getSendDataURL(commentProperties, methodAction) {
   );
 }
 function getGetDataURL(commentProperties) {
-  return "http://reputation.herokuapp.com/userComments/".concat(
+  return "https://reputation.herokuapp.com/userComments/".concat(
     userScriptId,"/",
     commentProperties.curDomain,"/",
     commentProperties.userId,"/get?callback=userReputationDataCallback"
