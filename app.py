@@ -45,9 +45,10 @@ def getUserComments(userScriptId, website, userId):
         'siteUserId': userId
     }
     # run query, make it into a {data: []} form, then jsonify & return
-    raw_data = {'data': [a for a in db.comments.find(query_args)]}
+    raw_data = [a for a in db.comments.find(query_args)]
     json_result = json.loads(json_util.dumps(raw_data))
-    return jsonify(json_result)
+    return "%s(%s)" % (request.args.get('callback'), json.dumps(json_result))
+    # return jsonify(data=json_result)
 
 @app.route('/userComments/<userScriptId>/<website>/get')
 @crossdomain(origin='*')
@@ -67,4 +68,5 @@ def getPageComments(userScriptId, website):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+    app.debug = True
     app.run(host='0.0.0.0', port=port)
