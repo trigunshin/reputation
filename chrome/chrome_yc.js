@@ -269,11 +269,12 @@ var init_static_comment_forms = function(user_script_id) {
 
     for(var i=0,iLen=comheads.length;i<iLen;i++) {
         var comHead = comheads[i];
-        anchors = comHead.select("a");
+        var anchors = comHead.getElementsByTagName("a");
+        if(!anchors || anchors.length != 2) continue;  // skip first span/link which is user who submitted the item
         if(!anchors[0]) continue;
-        var userName = anchors[0].readAttribute('href').split('=')[1];
+        var userName = anchors[0].href.split('=')[1];
         var userId = userName;
-        var commentId = anchors[1].readAttribute('href').split('=')[1];
+        var commentId = anchors[1].href.split('=')[1];
 
         var commentProperties = {
             curDomain:curDomain,
