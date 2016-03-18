@@ -32,7 +32,7 @@ def addComment(userScriptId, website, articleId, username, userId, commentId):
 @crossdomain(origin='*')
 def deleteComment(userScriptId, website, articleId, username, userId, commentId):
     query_args = {
-        '_id': commentId
+        '_id': ObjectId(commentId)
     }
     result = db.comments.delete_many(query_args)
     return 'deleted %i comments' % result.deleted_count
