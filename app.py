@@ -66,6 +66,10 @@ def getPageComments(userScriptId, website):
     json_result = json.loads(json_util.dumps(raw_data))
     return jsonify(json_result)
 
+@app.route('/')
+def index():
+    return "i'm alive"
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.debug = True
