@@ -29,7 +29,7 @@ def addComment(userScriptId, website, articleId, username, userId, commentId):
     return 'Comment saved.'
 
 @app.route('/userData/<userScriptId>/<website>/<articleId>/<username>/<userId>/<commentId>/remove', methods=["POST"])
-@crossdomain(origin='*')
+@crossdomain(origin='*', methods=["POST"])
 def deleteComment(userScriptId, website, articleId, username, userId, commentId):
     query_args = {
         '_id': ObjectId(commentId)
