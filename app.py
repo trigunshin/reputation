@@ -25,6 +25,7 @@ def addComment(userScriptId, website, articleId, username, userId, commentId):
         'createdOn': datetime.utcnow(),
         'userCommentText': request.args.get('comment', None)
     }
+    db.comments.insert_one(query_args)
     return 'Comment saved.'
 
 @app.route('/userData/<userScriptId>/<website>/<articleId>/<username>/<userId>/<commentId>/remove', methods=["DELETE"])
