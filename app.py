@@ -42,13 +42,12 @@ def getUserComments(userScriptId, website, userId):
     query_args = {
         'userScriptId': userScriptId,
         'site': website,
-        'siteUserId': userId
+        'siteUserName': userId
     }
     # run query, make it into a {data: []} form, then jsonify & return
     raw_data = [a for a in db.comments.find(query_args)]
     json_result = json.loads(json_util.dumps(raw_data))
     return "%s(%s)" % (request.args.get('callback'), json.dumps(json_result))
-    # return jsonify(data=json_result)
 
 @app.route('/userComments/<userScriptId>/<website>/get')
 @crossdomain(origin='*')
