@@ -28,7 +28,7 @@ def addComment(userScriptId, website, articleId, username, userId, commentId):
     db.comments.insert_one(query_args)
     return 'Comment saved.'
 
-@app.route('/userData/<userScriptId>/<website>/<articleId>/<username>/<userId>/<commentId>/remove', methods=["DELETE"])
+@app.route('/userData/<userScriptId>/<website>/<articleId>/<username>/<userId>/<commentId>/remove', methods=["POST"])
 @crossdomain(origin='*')
 def deleteComment(userScriptId, website, articleId, username, userId, commentId):
     query_args = {
